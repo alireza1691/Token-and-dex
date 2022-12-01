@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.9;
+pragma solidity ^0.8.17;
 
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -23,16 +23,19 @@ contract MyToken is ERC20, ERC20Burnable {
     mapping(address => mapping(address => uint256)) private _allowances;
 
     mapping (address  => bool) internal _isMinter;
+    address[] _minters;
 
 
     constructor(uint256 initialSupply) ERC20("TomanCoin", "TC") {
         owner = payable(msg.sender);
-        _isMinter[msg.sender] = true;
+        _minters.push(msg.sender);
+        // _isMinter[msg.sender] = true;
         _mint(owner, initialSupply * (10 ** decimals()));    
     }
 
     function _addMinter(address newMinter) public onlyOwner{
         _isMinter[newMinter] = true;
+        _minters.push(newMinter);
 
         emit MinterAdded(newMinter);
     }
@@ -63,6 +66,15 @@ contract MyToken is ERC20, ERC20Burnable {
         }
 
         emit Transfer(account, address(0), amount);
+    }
+
+    function _checkMinter(address addressForCheck) public view returns(bool){
+        // bool isMinter = false;
+        // if (_isMinter[addressForCheck] == true) {
+        //     isMinter = true;
+        // }
+        // return isMinter;
+        return _isMinter[addressForCheck];
     }
 
     modifier onlyOwner {

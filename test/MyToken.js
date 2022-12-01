@@ -30,10 +30,11 @@ describe("MyToken contract", function () {
     })
 
     it("Should set the new minter that can mint token", async function() {
-      // const minterByOwner = await owner.myToken._addMinter(addr1)
-      const minterByOwner = await myToken.connect(owner)._addMinter(addr1.address)
-      const mint = await myToken.connect(addr1)._mint(addr2.address, 100)
-      expect(await myToken.balanceOf(addr2.address)).to.equal(100)
+      // await owner.call(myToken._addMinter(addr1.address))
+      await myToken.connect(owner)._addMinter(addr1.address)
+      const checkMinter = await myToken._checkMinter(addr1.address)
+      
+      expect(checkMinter).to.equal(true)
       // expect(myToken.onlyMinter(addr1)).to.equal(true)
     })
     
