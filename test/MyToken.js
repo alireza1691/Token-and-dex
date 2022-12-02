@@ -17,7 +17,7 @@ describe("MyToken contract", function () {
     Token = await ethers.getContractFactory("MyToken");
     [owner, addr1, addr2] = await hre.ethers.getSigners();
 
-    myToken = await Token.deploy(50)
+    myToken = await Token.deploy(100)
   })
   
   describe("Deployment", function () {
