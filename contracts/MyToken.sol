@@ -26,7 +26,7 @@ contract MyToken is ERC20, ERC20Burnable {
     address[] _minters;
 
 
-    constructor(uint256 initialSupply) ERC20("TomanToken", "TT") {
+    constructor() ERC20("TomanToken", "TT") {
         owner = payable(msg.sender);
         // _minters.push(msg.sender);
         // _isMinter[msg.sender] = true;

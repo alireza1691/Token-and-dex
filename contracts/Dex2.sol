@@ -22,9 +22,9 @@ interface IERC20 {
 contract MyDex {
 
     address public USDC = 0x07865c6E87B9F70255377e024ace6630C1Eaa37F;
-    address public myToken;
+    // address public myToken;
     IERC20 public USDCToken = IERC20(USDC);
-    IERC20 public MYToken = IERC20(myToken);
+    IERC20 public MYToken;
 
     uint public reserveUSDC;
     uint public reserveMYToken;
@@ -33,7 +33,7 @@ contract MyDex {
     mapping (address => uint) public balanceOf;
 
     constructor(address _token) {
-        myToken = _token;
+        MYToken = IERC20 (_token);
     }
 
     function _mintShares (address _to, uint _amount) private {
@@ -74,7 +74,6 @@ contract MyDex {
     }
 
     function _addLiquidity (uint _amountUSDCToken, uint _amountMYToken) external returns (uint shares){
-
         // Pull in USDC & MYToken
         USDCToken.transferFrom(msg.sender, address(this), _amountUSDCToken);
         MYToken.transferFrom(msg.sender, address(this), _amountMYToken);
@@ -97,6 +96,30 @@ contract MyDex {
 
         // Update reserves
         _updateReserves(USDCToken.balanceOf(address(this)), MYToken.balanceOf(address(this)));
+    }
+
+    function _removeLiquidity(uint _shares)external returns (uint amountUSDC, uint amountMYToken) {
+        // Calculate amounts with shares:
+        // dx = (s * x) / T
+        // dy = (s * y) / T
+        uint balUSDC = USDCToken.balanceOf(address(this));
+        uint balMYT = MYToken.balanceOf(address(this));
+
+        amountUSDC = (_shares * balUSDC ) / totalSupply;
+        amountMYToken = (_shares * balMYT ) / totalSupply;
+
+        require(amountUSDC > 0 && amountMYToken > 0, "One the amounts = 0");
+
+        // Burn the shares
+        _burnShares(msg.sender, _shares);
+
+        // Update reserves 
+        _updateReserves(balUSDC - amountUSDC, balMYT - amountMYToken);
+
+        // Transfer tokens to msg.sender
+        USDCToken.transfer(msg.sender, amountUSDC);
+        MYToken.transfer(msg.sender, amountMYToken);
+
     }
 
     function _sqrt (uint y) private pure returns (uint z) {

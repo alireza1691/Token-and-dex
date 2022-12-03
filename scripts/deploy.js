@@ -12,6 +12,15 @@ async function main() {
  await token.deployed()
 
  console.log("Congratulations!! Your token deployed, Here's token address:", token.address);
+
+ const Dex = await hre.ethers.getContractFactory("Dex2")
+ const myDex = await Dex.deploy(token.address)
+ await token.deployed()
+
+ console.log("Here's your dex contract address:", myDex.address);
+
+
+
 }
 
 // We recommend this pattern to be able to use async/await everywhere
