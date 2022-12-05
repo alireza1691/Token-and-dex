@@ -11,6 +11,8 @@ async function main() {
  const token = await Token.deploy();
  await token.deployed()
 
+//  await mintContract.functions.mint(id, amount, {gasLimit: 40000000});
+
  console.log("Congratulations!! Your token deployed, Here's token address:", token.address);
 
  const Dex = await hre.ethers.getContractFactory("Dex2")
