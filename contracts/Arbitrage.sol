@@ -68,8 +68,11 @@ contract Arbitrage {
         }
         return(UB, MB);
     }
+
+    // **** keep going with here: ******
+    
     function calculateHowMuch() public returns(uint) {
-        
+
         return (2);   
     }
 
