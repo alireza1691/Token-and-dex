@@ -19,7 +19,7 @@ interface IERC20 {
     ) external returns (bool);
 }
 
-contract MyDex {
+contract DexStable {
 
     address public USDC = 0x07865c6E87B9F70255377e024ace6630C1Eaa37F;
     // address public myToken;
