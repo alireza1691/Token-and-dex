@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 pragma abicoder v2;
 
@@ -22,7 +22,7 @@ interface IERC20 {
 contract MyDex {
 
     address public USDC = 0x07865c6E87B9F70255377e024ace6630C1Eaa37F;
-    // address public myToken;
+    address public myToken;
     IERC20 public USDCToken = IERC20(USDC);
     IERC20 public MYToken;
 
@@ -32,8 +32,16 @@ contract MyDex {
     uint public totalSupply;
     mapping (address => uint) public balanceOf;
 
-    constructor(address _token) {
+    constructor(address _token ) {
         MYToken = IERC20 (_token);
+        myToken = _token;
+    }
+
+    function _getTokenAddress() external view returns (address) {
+        return (USDC);
+    }
+    function _getUSDCAddress() external view returns (address){
+        return (myToken);
     }
 
     function _mintShares (address _to, uint _amount) private {
@@ -67,6 +75,7 @@ contract MyDex {
         _updateReserves(USDCToken.balanceOf(address(this)), MYToken.balanceOf(address(this)));
 
     }
+
 
     function _updateReserves (uint _reserveUSDC, uint _reserveMYToken) private {
         reserveUSDC = _reserveUSDC;
