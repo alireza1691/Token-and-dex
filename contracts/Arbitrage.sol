@@ -33,9 +33,14 @@ interface IERC20 {
 
 contract Arbitrage {
 
+    uint immutable usdcDecimal = 6;
+    uint immutable myTokenDecimal = 18;
+    uint immutable difDecimals = 12;
+
     IERC20 public MToken;
     IERC20 public UToken;
-    uint _myTokenPrice;
+    uint public _myTokenPrice;
+    uint public _range;
     address _dexAddress;
 
     constructor (uint price, address usdcA, address tokenA, address dexA) {
@@ -44,8 +49,13 @@ contract Arbitrage {
         IERC20  UToken = IERC20(usdcA);
         IERC20  MToken = IERC20(tokenA);
     }
+
+    function setPriceAndRange (uint newPrice, uint range) external {
+        _myTokenPrice = newPrice;
+        _range = range;
+    }
     
-    function start(uint _price ) external {
+    function start() external {
         uint duration = block.timestamp + 6 weeks;
         
         for (uint i = block.timestamp ; i < duration; checkBalance()) {
@@ -57,12 +67,12 @@ contract Arbitrage {
         
         uint UB = UToken.balanceOf(address(_dexAddress));
         uint MB = MToken.balanceOf(address(_dexAddress));
-        if (MB / UB > _myTokenPrice + 1) {
+        if (MB / (UB * 10 ** 16) > (_myTokenPrice * 101) ) {
 
             uint amount = calculateHowMuch();
             buy(amount);
         }
-        if (MB / UB < _myTokenPrice - 1) {
+        if (MB / (UB * difDecimals) < _myTokenPrice  * 99) {
             uint amount = calculateHowMuch();
             sell(amount);
         }
@@ -70,7 +80,7 @@ contract Arbitrage {
     }
 
     // **** keep going with here: ******
-    
+
     function calculateHowMuch() public returns(uint) {
 
         return (2);   

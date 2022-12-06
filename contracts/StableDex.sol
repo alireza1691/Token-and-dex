@@ -30,12 +30,19 @@ contract MyDex {
     uint public reserveUSDC;
     uint public reserveMYToken;
 
+    uint public price;
+
     uint public totalSupply;
     mapping (address => uint) public balanceOf;
 
-    constructor(address _token ) {
+    constructor(address _token, uint _price) {
         MYToken = IERC20 (_token);
         myToken = _token;
+        price = _price;
+    }
+
+    function _changePrice(uint _newPrice) external {
+        price = _newPrice;
     }
 
     function _getTokenAddress() external view returns (address) {
@@ -67,7 +74,8 @@ contract MyDex {
         // Calculate token out
         // ydx / (x + dx) = dy
         uint _amountInWithFee = (_amountIn * 995) / 1000;
-        _amountOut = (reserveOut * _amountInWithFee) / (reserveIn + _amountInWithFee);
+        // _amountOut = (reserveOut * _amountInWithFee) / (reserveIn + _amountInWithFee);
+        _amountOut = isUsdc ? (_amountInWithFee * price * 10 ** 12) : (_amountInWithFee / (price * 10 ** 12));
 
         // Transfer token out to msg.sender
         tokenOut.transfer(msg.sender, _amountOut);
@@ -89,8 +97,8 @@ contract MyDex {
 
     function _addLiquidity (uint _amountUSDCToken, uint _amountMYToken) external returns (uint shares){
         // Pull in USDC & MYToken
-        USDCToken.transferFrom(msg.sender, address(this), (_amountUSDCToken * 10 **6));
-        MYToken.transferFrom(msg.sender, address(this), (_amountMYToken * 10 ** 18 ));
+        USDCToken.transferFrom(msg.sender, address(this), (_amountUSDCToken ));
+        MYToken.transferFrom(msg.sender, address(this), (_amountMYToken));
 
         // DY / DX = Y / X
         if (reserveUSDC > 0 || reserveMYToken > 0) {
