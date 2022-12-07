@@ -1,0 +1,21 @@
+{
+  "name": "dex",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "compile": "solcjs --bin --abi --include-path node-modules/ --base-path . -o . blockchain/contracts/StableDex.sol --output-dir blockchain/build blockchain/contracts/MyToken.sol --output-dir blockchain/build"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.8.0",
+    "bulma": "^0.9.4",
+    "eslint": "8.29.0",
+    "eslint-config-next": "13.0.6",
+    "next": "13.0.6",
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
+  }
+}

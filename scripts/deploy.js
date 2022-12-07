@@ -16,9 +16,9 @@ async function main() {
 
  console.log("Congratulations!! Your token deployed, Here's token address:", token.address);
 
- const Dex = await hre.ethers.getContractFactory("MyDex")
- const myDex = await Dex.deploy(token.address)
- await token.deployed()
+ const Dex = await hre.ethers.getContractFactory("StableDex")
+ const myDex = await Dex.deploy(token.address, 37)
+ await myDex.deployed()
 
  console.log("Here's your dex contract address:", myDex.address);
 
