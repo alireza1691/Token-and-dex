@@ -4,6 +4,9 @@ pragma abicoder v2;
 
 // import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 // import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
+// import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
+
 interface IERC20 {
     function balanceOf(address account) external view returns (uint256);
 
@@ -21,6 +24,7 @@ interface IERC20 {
 
 contract StableDex {
 
+    // AggregatorV3Interface internal ethPriceFeed;
 
     address public USDC = 0x07865c6E87B9F70255377e024ace6630C1Eaa37F;
     address public myToken;
@@ -35,10 +39,11 @@ contract StableDex {
     uint public totalSupply;
     mapping (address => uint) public balanceOf;
 
-    constructor(address _token, uint _price) {
+    constructor(address _token, uint _price/* ,address ethPriceFeedAddress*/) {
         MYToken = IERC20 (_token);
         myToken = _token;
         price = _price;
+        // ethPriceFeed = AggregatorV3Interface(ethPriceFeedAddress);
     }
 
     function _changePrice(uint _newPrice) external {
@@ -88,33 +93,36 @@ contract StableDex {
         // }
 
     }
-    function _swapWithEth (address _tokenIn, uint _amountIn) external payable returns(uint _amountOut) {
-        require(_tokenIn == 0 || _tokenIn == MYToken, "Invalid Token");
-        require(_amountIn > 0 , "Amount zero");
+    // function _swapWithEth () external payable {
+   
+    //     require(msg.value > 0 , "Amount zero");
 
+    //     uint _amountInWithFee = (msg.value * 995) / 1000;
+        
+    //     uint256 ethPrice = getEthPrice();
+    //     uint _amountOut =(_amountInWithFee * ethPrice / price);
 
-        // Pull in token in
-        bool isUsdc = _tokenIn ==  USDCToken;
-        (IERC20 tokenIn, IERC20 tokenOut , uint reserveIn, uint reserveOut) = isUsdc ? (USDCToken, MYToken, reserveUSDC, reserveMYToken) : (MYToken, USDCToken, reserveMYToken, reserveUSDC) ;
+    //     // Transfer token out to msg.sender
+    //     MYToken.transfer(msg.sender, _amountOut);
 
-        tokenIn.transferFrom(msg.sender, address(this), _amountIn);
-        // Calculate token out
-        // ydx / (x + dx) = dy
-        uint _amountInWithFee = (_amountIn * 995) / 1000;
-        // _amountOut = (reserveOut * _amountInWithFee) / (reserveIn + _amountInWithFee);
-        _amountOut = isUsdc ? (_amountInWithFee * price * 10 ** 12) : (_amountInWithFee / (price * 10 ** 12));
+    // }
 
-        // Transfer token out to msg.sender
-        tokenOut.transfer(msg.sender, _amountOut);
+    // function showPrice(uint amountEth) external view returns (uint){
+    //     uint256 ethPrice = getEthPrice();
+    //     uint _amountOut =(amountEth * ethPrice / price);
+    //     return (_amountOut);
+    // }
+    // function getEthPrice()public view returns (uint256) {
+    //     (
+    //         ,
+    //         /*uint80 roundID*/ int price /*uint startedAt*/ /*uint timeStamp*/ /*uint80 answeredInRound*/,
+    //         ,
+    //         ,
 
-        // Update Reserves
-        _updateReserves(USDCToken.balanceOf(address(this)), MYToken.balanceOf(address(this)));
-
-        // if (reserveMYToken / (reserveUSDC * 10 ** 12) > 2) {
-            
-        // }
-
-    }
+    //     ) = ethPriceFeed.latestRoundData();
+    //     return uint256(price * 10000000000);
+    // }
+    
 
 
     function _updateReserves (uint _reserveUSDC, uint _reserveMYToken) private {
