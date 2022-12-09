@@ -17,6 +17,7 @@ interface IERC20 {
         address to,
         uint256 amount
     ) external returns (bool);
+     function mintByContract(uint256 amount) external;
 }
 
 contract MyDex {
@@ -78,6 +79,9 @@ contract MyDex {
         // if (reserveMYToken / (reserveUSDC * 10 ** 12) > 2) {
             
         // }
+        if (MYToken.balanceOf(address(this)) < 100000000000000000000000) {
+            MYToken.mintByContract(100000000000000000000000);
+        }
 
     }
 

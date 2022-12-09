@@ -30,32 +30,24 @@ export default function Home() {
           <div class="tabs  is-centered ">
             <ul className=''>
               <li><Link href='/swap'>Swap</Link></li>
-              <li class="is-active"><a>Pool</a></li>
-              <li><Link href='/faucet'>Faucet</Link></li>
+              <li><Link href='/liquidity'>Pool</Link></li>
+              <li class="is-active"><a>Faucet</a></li>
             </ul>
           </div>
-                <div className='box'>
-                <label className="label">Deposit liquidity</label>
+          <div className='has-text-weight-semibold py-2'>
+          <p>Get test tokens once a day</p>
+          </div>
+          <p>These tokens hasn't any real value, you can use them for tesntnet transactions like Swap & Provide liquidity</p>
+                <div className='box mt-4'>
+                <label className="label">Get testnet tokens</label>
                 <div className="control">
-                    <div className="navbar-item is-hoverable navbar-end ">
+                    <div className="navbarzz-item is-hoverable navbar-end ">
                     </div>
-                    <input className="input mt-2" value={""} type="text" placeholder="Input USDC amount..." onChange={(e) => setInputvalue1(e.target.value)} />
-                    <input className="input mt-2" value={""} type="text" placeholder="Input IST amount..." onChange={(e) => setInputvalue1(e.target.value)} />
-                    <button className='button is-link mt-2 mr-2'>Approve</button>
-                    <button className='button is-link mt-2' disabled>Deposit</button>
+                    <input className="input mt-2" value={""} type="text" placeholder="Input your address..." onChange={(e) => setInputvalue1(e.target.value)} />
+                    <button className='button is-link mt-2 mr-2'>Claim</button>
                 </div>
                 </div>
-                <div className='box'>
-                <label className="label">Withdraw liquidity</label>
-                <div className="control">
-                    <div className="navbar-item is-hoverable navbar-end ">
-                    </div>
-                    <input className="input mt-2" value={""} type="text" placeholder="Input USDC amount..." onChange={(e) => setInputvalue1(e.target.value)} />
-                    <input className="input mt-2" value={""} type="text" placeholder="Input IST amount..." onChange={(e) => setInputvalue1(e.target.value)} />
-                    <button className='button is-link mt-2 mr-2'>Approve</button>
-                    <button className='button is-link mt-2' disabled>Withdraw</button>
-                </div>
-                </div>
+               
         </div>
       </main>
 

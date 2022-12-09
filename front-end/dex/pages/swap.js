@@ -38,10 +38,11 @@ export default function Home() {
 
       <main className={styles.main}>
       <div className='box'>
-      <div class="tabs  is-centered ">
+      <div className="tabs  is-centered ">
               <ul className=''>
                 <li class="is-active"><a>Swap</a></li>
                 <li><Link href='/liquidity'>Pool</Link></li>
+                <li><Link href='/faucet'>Faucet</Link></li>
               </ul>
             </div>
         <div className='box'>
