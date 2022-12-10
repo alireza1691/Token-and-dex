@@ -4,6 +4,9 @@ pragma abicoder v2;
 
 // import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 // import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
+import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
+
 interface IERC20 {
     function balanceOf(address account) external view returns (uint256);
 
@@ -21,6 +24,7 @@ interface IERC20 {
 
 contract StableDex {
 
+    AggregatorV3Interface internal ethPriceFeed;
 
     address public USDC = 0x07865c6E87B9F70255377e024ace6630C1Eaa37F;
     address public myToken;
@@ -35,11 +39,14 @@ contract StableDex {
     uint public totalSupply;
     mapping (address => uint) public balanceOf;
 
-    constructor(address _token, uint _price) {
+    constructor(address _token, uint _price, address ethPriceFeedAddress) {
         MYToken = IERC20 (_token);
         myToken = _token;
         price = _price;
+        ethPriceFeed = AggregatorV3Interface(ethPriceFeedAddress);
     }
+
+    // ETH/USDC goerli feed price address: 0xD4a33860578De61DBAbDc8BFdb98FD742fA7028e
 
     function _changePrice(uint _newPrice) external {
         price = _newPrice;
@@ -88,6 +95,47 @@ contract StableDex {
         // }
 
     }
+    function _swapWithEth () external payable returns(uint _amountOut) {
+        // require(_tokenIn == 0 || _tokenIn == MYToken, "Invalid Token");
+        require(msg.value > 0 , "Amount zero");
+
+
+        // Pull in token in
+    
+        // Calculate token out
+        // ydx / (x + dx) = dy
+        uint _amountInWithFee = (msg.value * 995) / 1000;
+        
+        uint256 ethPrice = getEthPrice();
+        _amountOut =(_amountInWithFee * ethPrice * price / (10 ** 18));
+
+        // Transfer token out to msg.sender
+        MYToken.transfer(msg.sender, _amountOut);
+
+        // // Update Reserves
+        // _updateReserves(USDCToken.balanceOf(address(this)), MYToken.balanceOf(address(this)));
+
+        // if (reserveMYToken / (reserveUSDC * 10 ** 12) > 2) {
+            
+        // }
+
+    }
+    function showPrice(uint amountEth) external view returns (uint){
+        uint256 ethPrice = getEthPrice();
+        uint _amountOut =(amountEth * ethPrice / price);
+        return (_amountOut);
+    }
+    function getEthPrice()public view returns (uint256) {
+        (
+            ,
+            /*uint80 roundID*/ int price /*uint startedAt*/ /*uint timeStamp*/ /*uint80 answeredInRound*/,
+            ,
+            ,
+
+        ) = ethPriceFeed.latestRoundData();
+        return uint256(price * 10000000000);
+    }
+    
 
 
     function _updateReserves (uint _reserveUSDC, uint _reserveMYToken) private {
@@ -162,5 +210,6 @@ contract StableDex {
         return x<= y ? x : y;
     }
 
+    receive() external payable {}
    
 }

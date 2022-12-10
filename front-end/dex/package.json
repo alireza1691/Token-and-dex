@@ -10,6 +10,7 @@
     "compile": "solcjs --bin --abi --include-path node-modules/ --base-path . -o . blockchain/contracts/StableDex.sol --output-dir blockchain/build blockchain/contracts/MyToken.sol --output-dir blockchain/build"
   },
   "dependencies": {
+    "@chainlink/contracts": "^0.5.1",
     "@openzeppelin/contracts": "^4.8.0",
     "bulma": "^0.9.4",
     "eslint": "8.29.0",
