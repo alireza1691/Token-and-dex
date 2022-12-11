@@ -3,8 +3,46 @@ import Image from 'next/image'
 import styles from '../styles/Home.module.css'
 import 'bulma/css/bulma.css'
 import Link from 'next/link'
+import { useState, useEffect } from 'react'
+// import {/*MoralisProvider,*/ useMoralis} from "react-moralis"
 
-export default function Home() {
+
+export default function lp() {
+
+  const [error, setError] = useState ('')
+  const [address, setAddress] = useState()
+  const [web3, setWeb3] = useState()
+  const [bcContract, setBcContract] = useState()
+  const [balance, setBalance] = useState("0")
+  const [inputValue1, setInputvalue1] = useState()
+  const [inputValue2, setInputvalue2] = useState()
+  const [inputValue3, setInputvalue3] = useState()
+  const [betPlayers, setBetPlayers] = useState([])
+  const [totalValue, setTotalValue] = useState()
+
+  // const connectWalletHandler = async () => {
+  //   setError('')
+  //   if (typeof window !== "undefined" && typeof window.ethereum !== "undefined"){
+  //       try{
+  //           const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+  //           const account = accounts[0];
+  //           setAddress(account)
+  //           // const provider = new ethers.providers.Web3Provider(web3.currentProvider);
+  //           // setWeb3(web3)
+  //           // const accounts = await web3.eth.getAccounts();
+            
+  //           document.getElementById("connectButton").innerHTML = "Connected!"
+            
+  //       } catch (err) {
+  //           setError(err.message)
+  //       }
+        
+  //   } else {
+  //       console.log("please install metamask")
+  //   }
+  // }
+
+
   return (
     <div className={styles.container}>
       <Head>
@@ -19,7 +57,7 @@ export default function Home() {
             </div>
             <div className='navbar-end'>
               <div className='navbar-item'>
-                <button className='button is-link'>Connect Wallet</button>
+                <button onClick={""} className='button is-link'>Connect Wallet</button>
               </div>
             </div>
           </nav>
@@ -27,10 +65,10 @@ export default function Home() {
 
       <main className={styles.main}>
         <div className='box'>
-          <div class="tabs  is-centered ">
+          <div className="tabs  is-centered ">
             <ul className=''>
               <li><Link href='/swap'>Swap</Link></li>
-              <li class="is-active"><a>Pool</a></li>
+              <li className="is-active"><a>Pool</a></li>
               <li><Link href='/faucet'>Faucet</Link></li>
             </ul>
           </div>
@@ -39,8 +77,8 @@ export default function Home() {
                 <div className="control">
                     <div className="navbar-item is-hoverable navbar-end ">
                     </div>
-                    <input className="input mt-2" value={""} type="text" placeholder="Input USDC amount..." onChange={(e) => setInputvalue1(e.target.value)} />
-                    <input className="input mt-2" value={""} type="text" placeholder="Input IST amount..." onChange={(e) => setInputvalue1(e.target.value)} />
+                    <input className="input mt-2" value={""} type="text" placeholder="Input USDC amount..." />
+                    <input className="input mt-2" value={""} type="text" placeholder="Input IST amount..." />
                     <button className='button is-link mt-2 mr-2'>Approve</button>
                     <button className='button is-link mt-2' disabled>Deposit</button>
                 </div>
@@ -50,8 +88,8 @@ export default function Home() {
                 <div className="control">
                     <div className="navbar-item is-hoverable navbar-end ">
                     </div>
-                    <input className="input mt-2" value={""} type="text" placeholder="Input USDC amount..." onChange={(e) => setInputvalue1(e.target.value)} />
-                    <input className="input mt-2" value={""} type="text" placeholder="Input IST amount..." onChange={(e) => setInputvalue1(e.target.value)} />
+                    <input className="input mt-2" value={""} type="text" placeholder="Input USDC amount..." />
+                    <input className="input mt-2" value={""} type="text" placeholder="Input IST amount..." />
                     <button className='button is-link mt-2 mr-2'>Approve</button>
                     <button className='button is-link mt-2' disabled>Withdraw</button>
                 </div>

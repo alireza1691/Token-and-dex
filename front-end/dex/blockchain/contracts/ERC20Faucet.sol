@@ -11,10 +11,13 @@ import "./Context.sol";
 
 // @author: Alireza Haghshenas     https://github.com/alireza1691     Telegram: @Alireza1691  
 
-contract MyToken is Context, IERC20 {
+contract ERC20Faucet is Context, IERC20 {
     mapping(address => uint256) private _balances;
 
     mapping(address => mapping(address => uint256)) private _allowances;
+
+    mapping (address => uint256) public timeForNextFaucet;
+    mapping (address => uint) public txCount;
 
     uint256 private _totalSupply;
     address payable _owner;
@@ -41,6 +44,15 @@ contract MyToken is Context, IERC20 {
         _symbol = symbol_;
         _balances[msg.sender] = 1000000000000000000000000;
         _totalSupply += 1000000000000000000000000;
+
+    }
+
+    function getFaucet(address user) external {
+        require(msg.sender == user, 'you can not sent token for another address');
+        require(msg.sender != address(0),"address zero");
+        require(timeForNextFaucet[msg.sender] < block.timestamp,"address zero");
+
+        _mint(user, 50000000000000000000);
 
     }
 

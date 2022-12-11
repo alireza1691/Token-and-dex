@@ -3,8 +3,86 @@ import Image from 'next/image'
 import styles from '../styles/Home.module.css'
 import 'bulma/css/bulma.css'
 import Link from 'next/link'
+import { useState, useEffect } from 'react'
+import {/*MoralisProvider,*/ useMoralis, useWeb3Contract} from 'react-moralis'
+import { faucetAbi, faucetContractAddress } from '../constants'
+import { ethers } from 'ethers'
+// import { ethers } from 'hardhat'
+// import faucetContract from '../blockchain/faucetAbi'
+// import { ConnectButton } from "web3uikit"
 
-export default function Home() {
+export default function faucet() {
+
+  const { enableWeb3, isWeb3Enabled, isWeb3EnableLoading, account, Moralis, deactivateWeb3 } =
+        useMoralis()
+
+
+  const [isConnected, setIsConnected] = useState(false);
+  const [provider, setProvider] = useState();
+  const [signer, setSigner] = useState()
+  const [error, setError] = useState ('')
+  const [address, setAddress] = useState()
+  const [web3, setWeb3] = useState()
+  const [bcContract, setBcContract] = useState()
+  const [balance, setBalance] = useState("0")
+  const [inputValue1, setInputvalue1] = useState()
+  const [inputValue2, setInputvalue2] = useState()
+  const [signerAddress, setSignerAddress] = useState()
+  const [betPlayers, setBetPlayers] = useState([])
+  const [totalValue, setTotalValue] = useState()
+
+  const connect =async () => {
+    if (typeof window !== "undefined" && typeof window.ethereum !== "undefined") {
+      try {
+        await ethereum.request({method: "eth_requestAccounts"});
+        setIsConnected(true)
+        let connectedProvider = new ethers.providers.Web3Provider(window.ethereum)
+        setProvider(connectedProvider)
+        const _signer = connectedProvider.getSigner()
+        setSigner(_signer)
+        setSignerAddress(_signer.getAddress( ))
+        console.log(_signer.getAddress( ));
+        console.log(inputValue1);
+      } catch (e) {
+        console.log(e);
+      }
+    } else {
+      setIsConnected(false)
+    }
+  }
+
+  const faucetContract = ethers => {
+   return new ethers.Contract( "0xf3BfC4Ce2c8392fc93D24e74193b1d133320126e" , faucetAbi , provider )
+  }
+    
+  const { runContractFunction: getFaucet } = useWeb3Contract({
+    abi: faucetAbi,
+    contractAddress: faucetContractAddress, // specify the networkId
+    functionName: "getFaucet",
+    params: {inputValue1},
+  })
+
+  // const getFaucet = async () => {
+  //   await faucetContract.methods.getFaucet().send()
+  // }
+
+
+//   const handleSuccess = async function(tx) {
+//     await tx.wait(1)
+//     handleNewNotification(tx)
+// }
+
+// const handleNewNotification = function () {
+//     dispatch ({
+//         type: "info",
+//         message: "Transaction Complete",
+//         title: "Tx Notification",
+//         position: "topR",
+//         icon: "bell"
+//     })
+// }
+
+
   return (
     <div className={styles.container}>
       <Head>
@@ -19,7 +97,8 @@ export default function Home() {
             </div>
             <div className='navbar-end'>
               <div className='navbar-item'>
-                <button className='button is-link'>Connect Wallet</button>
+               
+                {isConnected ? (<button onClick={connect} className='button is-link'>Connected</button>) : (<button onClick={connect} className='button is-link'>Connect </button>)}
               </div>
             </div>
           </nav>
@@ -27,11 +106,11 @@ export default function Home() {
 
       <main className={styles.main}>
         <div className='box'>
-          <div class="tabs  is-centered ">
+          <div className="tabs  is-centered ">
             <ul className=''>
               <li><Link href='/swap'>Swap</Link></li>
               <li><Link href='/liquidity'>Pool</Link></li>
-              <li class="is-active"><a>Faucet</a></li>
+              <li className="is-active"><a>Faucet</a></li>
             </ul>
           </div>
           <div className='has-text-weight-semibold py-2'>
@@ -43,8 +122,8 @@ export default function Home() {
                 <div className="control">
                     <div className="navbarzz-item is-hoverable navbar-end ">
                     </div>
-                    <input className="input mt-2" value={""} type="text" placeholder="Input your address..." onChange={(e) => setInputvalue1(e.target.value)} />
-                    <button className='button is-link mt-2 mr-2'>Claim</button>
+                    <input className="input mt-2" value={inputValue1} type="text" placeholder="Input your address..."  />
+                    <button onClick={async () => await getFaucet()} className='button is-link mt-2 mr-2'>Claim</button>
                 </div>
                 </div>
                
@@ -65,4 +144,4 @@ export default function Home() {
       </footer>
     </div>
   )
-}
+  }

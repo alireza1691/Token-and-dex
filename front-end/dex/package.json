@@ -7,17 +7,24 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "compile": "solcjs --bin --abi --include-path node-modules/ --base-path . -o . blockchain/contracts/StableDex.sol --output-dir blockchain/build blockchain/contracts/MyToken.sol --output-dir blockchain/build"
+    "compile": "solcjs  --abi --include-path node-modules/ --base-path . -o . blockchain/contracts/StableDex.sol --output-dir blockchain/build blockchain/contracts/MyToken.sol --output-dir blockchain/build blockchain/contracts/Faucet.sol --output-dir blockchain/build blockchain/contracts/ERC20Faucet.sol --output-dir blockchain/build"
   },
   "dependencies": {
     "@chainlink/contracts": "^0.5.1",
     "@openzeppelin/contracts": "^4.8.0",
     "bulma": "^0.9.4",
+    "css-loader": "^6.7.2",
     "eslint": "8.29.0",
     "eslint-config-next": "13.0.6",
+    "ethers": "^5.7.2",
+    "file-loader": "^6.2.0",
+    "moralis": "^2.9.0",
     "next": "13.0.6",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "solc": "^0.8.17"
+    "react-moralis": "^1.4.2",
+    "solc": "^0.8.17",
+    "style-loader": "^3.3.1",
+    "url-loader": "^4.1.1"
   }
 }

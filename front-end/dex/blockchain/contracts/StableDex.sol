@@ -5,7 +5,8 @@ pragma abicoder v2;
 // import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 // import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
+// import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
+import "./AggregatorV3Interface.sol";
 
 interface IERC20 {
     function balanceOf(address account) external view returns (uint256);
@@ -122,7 +123,7 @@ contract StableDex {
     }
     function showPrice(uint amountEth) external view returns (uint){
         uint256 ethPrice = getEthPrice();
-        uint _amountOut =(amountEth * ethPrice / price);
+        uint _amountOut =((amountEth * ethPrice * price) / (10 ** 18));
         return (_amountOut);
     }
     function getEthPrice()public view returns (uint256) {
