@@ -16,7 +16,7 @@ contract ERC20Faucet is Context, IERC20 {
 
     mapping(address => mapping(address => uint256)) private _allowances;
 
-    mapping (address => uint256) public timeForNextFaucet;
+    mapping (address => uint256) public timeOfLastFaucet;
     mapping (address => uint) public txCount;
 
     uint256 private _totalSupply;
@@ -47,12 +47,14 @@ contract ERC20Faucet is Context, IERC20 {
 
     }
 
-    function getFaucet(address user) external {
-        require(msg.sender == user, 'you can not sent token for another address');
+    function getFaucet() external {
+        // require(msg.sender == user, 'you can not sent token for another address');
         require(msg.sender != address(0),"address zero");
-        require(timeForNextFaucet[msg.sender] < block.timestamp,"address zero");
+        // require(timeOfLastFaucet[msg.sender] + 1 days < block.timestamp,"once a day");
 
-        _mint(user, 50000000000000000000);
+        _mint(msg.sender, 50000000000000000000);
+
+        // timeOfLastFaucet[msg.sender] = block.timestamp;
 
     }
 

@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import {/*MoralisProvider,*/ useMoralis, useWeb3Contract} from 'react-moralis'
 import { faucetAbi, faucetContractAddress } from '../constants'
-import { ethers } from 'ethers'
+import { Contract, ethers } from 'ethers'
 // import { ethers } from 'hardhat'
 // import faucetContract from '../blockchain/faucetAbi'
 // import { ConnectButton } from "web3uikit"
@@ -51,20 +51,23 @@ export default function faucet() {
     }
   }
 
-  const faucetContract = ethers => {
-   return new ethers.Contract( "0xf3BfC4Ce2c8392fc93D24e74193b1d133320126e" , faucetAbi , provider )
-  }
-    
-  const { runContractFunction: getFaucet } = useWeb3Contract({
-    abi: faucetAbi,
-    contractAddress: faucetContractAddress, // specify the networkId
-    functionName: "getFaucet",
-    params: {inputValue1},
-  })
+  const _faucetContract = new ethers.Contract("0x2cd4e4c16d5738bd3395b221a9701aa9190e9b8c" , faucetAbi , signer )
 
-  // const getFaucet = async () => {
-  //   await faucetContract.methods.getFaucet().send()
-  // }
+  const faucetContract = ethers => {
+   return new ethers.Contract( "0x2cd4e4c16d5738bd3395b221a9701aa9190e9b8c" , faucetAbi , provider )
+  }
+  
+    
+  // const { runContractFunction: getFaucet } = useWeb3Contract({
+  //   abi: faucetAbi,
+  //   contractAddress: faucetContractAddress, // specify the networkId
+  //   functionName: "getFaucet",
+  //   params: {inputValue1},
+  // })
+
+  const getFaucetToken = async () => {
+    await _faucetContract.getFaucet(signerAddress)
+  }
 
 
 //   const handleSuccess = async function(tx) {
@@ -123,7 +126,7 @@ export default function faucet() {
                     <div className="navbarzz-item is-hoverable navbar-end ">
                     </div>
                     <input className="input mt-2" value={inputValue1} type="text" placeholder="Input your address..."  />
-                    <button onClick={async () => await getFaucet()} className='button is-link mt-2 mr-2'>Claim</button>
+                    <button onClick={async () => await getFaucetToken()} className='button is-link mt-2 mr-2'>Claim</button>
                 </div>
                 </div>
                
