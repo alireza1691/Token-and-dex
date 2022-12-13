@@ -72,28 +72,28 @@ export default function lp() {
               <li><Link href='/faucet'>Faucet</Link></li>
             </ul>
           </div>
-                <div className='box'>
-                <label className="label">Deposit liquidity</label>
-                <div className="control">
-                    <div className="navbar-item is-hoverable navbar-end ">
-                    </div>
-                    <input className="input mt-2" value={""} type="text" placeholder="Input USDC amount..." />
-                    <input className="input mt-2" value={""} type="text" placeholder="Input IST amount..." />
-                    <button className='button is-link mt-2 mr-2'>Approve</button>
-                    <button className='button is-link mt-2' disabled>Deposit</button>
-                </div>
-                </div>
-                <div className='box'>
-                <label className="label">Withdraw liquidity</label>
-                <div className="control">
-                    <div className="navbar-item is-hoverable navbar-end ">
-                    </div>
-                    <input className="input mt-2" value={""} type="text" placeholder="Input USDC amount..." />
-                    <input className="input mt-2" value={""} type="text" placeholder="Input IST amount..." />
-                    <button className='button is-link mt-2 mr-2'>Approve</button>
-                    <button className='button is-link mt-2' disabled>Withdraw</button>
-                </div>
-                </div>
+          <div className='box'>
+            <label className="label">Deposit liquidity</label>
+            <div className="control">
+              <div className="navbar-item is-hoverable navbar-end ">
+              </div>
+              <input className="input mt-2" value={""} type="text" placeholder="Input USDC amount..." />
+              <input className="input mt-2" value={""} type="text" placeholder="Input IST amount..." />
+              <button className='button is-link mt-2 mr-2'>Approve</button>
+              <button className='button is-link mt-2' disabled>Deposit</button>
+            </div>
+          </div>
+          <div className='box'>
+            <label className="label">Withdraw liquidity</label>
+            <div className="control">
+              <div className="navbar-item is-hoverable navbar-end ">
+              </div>
+              <input className="input mt-2" value={""} type="text" placeholder="Input USDC amount..." />
+              <input className="input mt-2" value={""} type="text" placeholder="Input IST amount..." />
+              <button className='button is-link mt-2 mr-2'>Approve</button>
+              <button className='button is-link mt-2' disabled>Withdraw</button>
+            </div>
+          </div>
         </div>
       </main>
 

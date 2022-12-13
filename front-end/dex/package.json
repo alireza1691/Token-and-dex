@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@chainlink/contracts": "^0.5.1",
+    "@headlessui/react": "^1.7.5",
     "@openzeppelin/contracts": "^4.8.0",
     "bulma": "^0.9.4",
     "css-loader": "^6.7.2",

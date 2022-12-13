@@ -79,14 +79,14 @@ export default function swap() {
         </div>
 
       <main className={styles.main}>
-      <div className='box'>
-      <div className="tabs  is-centered ">
-              <ul className=''>
-                <li className="is-active"><a>Swap</a></li>
-                <li><Link href='/liquidity'>Pool</Link></li>
-                <li><Link href='/faucet'>Faucet</Link></li>
-              </ul>
-            </div>
+        <div className='box'>
+          <div className="tabs  is-centered ">
+            <ul className=''>
+              <li className="is-active"><a>Swap</a></li>
+              <li><Link href='/liquidity'>Pool</Link></li>
+              <li><Link href='/faucet'>Faucet</Link></li>
+            </ul>
+          </div>
         <div className='box'>
           <label className="label">IST to USDC</label>
           <div className="control">

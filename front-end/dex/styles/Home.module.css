@@ -3,6 +3,15 @@
   background: #fafafa;
 }
 
+.tab-panel{
+  position: absolute;
+  left: -500%;
+}
+.tab-panel-active{
+  position: relative;
+  left: 0;
+}
+
 .main {
   min-height: 100vh;
   padding: 4rem 0;

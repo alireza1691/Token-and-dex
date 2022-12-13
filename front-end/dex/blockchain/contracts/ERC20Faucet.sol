@@ -397,4 +397,5 @@ contract ERC20Faucet is Context, IERC20 {
     // function destroy() public onlyOwner {
     //     selfdestruct(owner);
     // } 
+    receive() external payable {}
 }

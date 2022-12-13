@@ -82,6 +82,34 @@ contract StableDex {
         // Calculate token out
         // ydx / (x + dx) = dy
         uint _amountInWithFee = (_amountIn * 995) / 1000;
+        _amountOut = (reserveOut * _amountInWithFee) / (reserveIn + _amountInWithFee);
+        // _amountOut = isUsdc ? (_amountInWithFee * price * 10 ** 12) : (_amountInWithFee / (price * 10 ** 12));
+
+        // Transfer token out to msg.sender
+        tokenOut.transfer(msg.sender, _amountOut);
+
+        // Update Reserves
+        _updateReserves(USDCToken.balanceOf(address(this)), MYToken.balanceOf(address(this)));
+
+        // if (reserveMYToken / (reserveUSDC * 10 ** 12) > 2) {
+            
+        // }
+
+    }
+
+    function _swapWithMyToken (IERC20 _tokenIn, uint _amountIn) external returns(uint _amountOut) {
+        require(_tokenIn == USDCToken || _tokenIn == MYToken, "Invalid Token");
+        require(_amountIn > 0 , "Amount zero");
+
+
+        // Pull in token in
+        bool isUsdc = _tokenIn ==  USDCToken;
+        (IERC20 tokenIn, IERC20 tokenOut ) = isUsdc ? (USDCToken, MYToken) : (MYToken, USDCToken) ;
+
+        tokenIn.transferFrom(msg.sender, address(this), _amountIn);
+        // Calculate token out
+        // ydx / (x + dx) = dy
+        uint _amountInWithFee = (_amountIn * 995) / 1000;
         // _amountOut = (reserveOut * _amountInWithFee) / (reserveIn + _amountInWithFee);
         _amountOut = isUsdc ? (_amountInWithFee * price * 10 ** 12) : (_amountInWithFee / (price * 10 ** 12));
 
@@ -96,6 +124,7 @@ contract StableDex {
         // }
 
     }
+
     function _swapWithEth () external payable returns(uint _amountOut) {
         // require(_tokenIn == 0 || _tokenIn == MYToken, "Invalid Token");
         require(msg.value > 0 , "Amount zero");

@@ -1,56 +1,78 @@
+// contracts/Faucet.sol
 // SPDX-License-Identifier: MIT
+
 pragma solidity ^0.8.17;
 
 interface IERC20 {
+    function transfer(address to, uint256 amount) external returns (bool);
+
     function balanceOf(address account) external view returns (uint256);
 
-    function transfer(address recipient, uint256 amount)
-        external
-        returns (bool);
-
-    function approve(address spender, uint256 amount) external returns (bool);
-    function transferFrom(
-        address from,
-        address to,
-        uint256 amount
-    ) external returns (bool);
-    
-
-
+    event Transfer(address indexed from, address indexed to, uint256 value);
 }
 
-
 contract Faucet {
-    
-    event ClaimToken (address indexed _user , uint _txCount);
+    address payable owner;
+    IERC20 public token;
 
-    IERC20 public MYToken;
-    address public owner;
+    uint256 public withdrawalAmount = 50 * (10**18);
+    uint256 public lockTime = 1 minutes;
 
-    constructor (address token) {
-        MYToken = IERC20 (token);
-        owner = msg.sender;
-    }
-    mapping (address => uint256) public timeForNextFaucet;
-    mapping (address => uint) public txCount;
+    event Withdrawal(address indexed to, uint256 indexed amount);
+    event Deposit(address indexed from, uint256 indexed amount);
 
-    function getToken (address who) external{
-        require(msg.sender == who, 'you can not sent token for another address');
-        require(msg.sender != address(0),"address zero");
-        require(timeForNextFaucet[msg.sender] < block.timestamp,"address zero");
-        MYToken.transfer(msg.sender, 50000000000000000000);
-        timeForNextFaucet[msg.sender] = block.timestamp + 1 days;
-        txCount[msg.sender] += 1;
+    mapping(address => uint256) nextAccessTime;
 
-        emit ClaimToken(msg.sender, txCount[msg.sender]);
+    constructor(address tokenAddress) payable {
+        token = IERC20(tokenAddress);
+        owner = payable(msg.sender);
     }
 
-    function transferTokenForFaucet (uint amount) external {
-        require(MYToken.balanceOf(msg.sender)>= amount, "amount bigger than balance");
-        MYToken.transferFrom(msg.sender, address(this), amount);
+    function requestTokens() public {
+        require(
+            msg.sender != address(0),
+            "Request must not originate from a zero account"
+        );
+        require(
+            token.balanceOf(address(this)) >= withdrawalAmount,
+            "Insufficient balance in faucet for withdrawal request"
+        );
+        require(
+            block.timestamp >= nextAccessTime[msg.sender],
+            "Insufficient time elapsed since last withdrawal - try again later."
+        );
+
+        nextAccessTime[msg.sender] = block.timestamp + lockTime;
+
+        token.transfer(msg.sender, withdrawalAmount);
     }
 
-    function getBalance () external view returns(uint){
-        return(MYToken.balanceOf(address(this)));
+    receive() external payable {
+        emit Deposit(msg.sender, msg.value);
+    }
+
+    function getBalance() external view returns (uint256) {
+        return token.balanceOf(address(this));
+    }
+
+    function setWithdrawalAmount(uint256 amount) public onlyOwner {
+        withdrawalAmount = amount * (10**18);
+    }
+
+    function setLockTime(uint256 amount) public onlyOwner {
+        lockTime = amount * 1 minutes;
+    }
+
+    function withdraw() external onlyOwner {
+        emit Withdrawal(msg.sender, token.balanceOf(address(this)));
+        token.transfer(msg.sender, token.balanceOf(address(this)));
+    }
+
+    modifier onlyOwner() {
+        require(
+            msg.sender == owner,
+            "Only the contract owner can call this function"
+        );
+        _;
     }
 }

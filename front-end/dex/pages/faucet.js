@@ -20,7 +20,8 @@ export default function faucet() {
   const [isConnected, setIsConnected] = useState(false);
   const [provider, setProvider] = useState();
   const [signer, setSigner] = useState()
-  const [error, setError] = useState ('')
+  const [faucetContract, setFaucetContract] = useState()
+  const [getFaucetError, setGetFaucetError] = useState ('')
   const [address, setAddress] = useState()
   const [web3, setWeb3] = useState()
   const [bcContract, setBcContract] = useState()
@@ -31,18 +32,21 @@ export default function faucet() {
   const [betPlayers, setBetPlayers] = useState([])
   const [totalValue, setTotalValue] = useState()
 
-  const connect =async () => {
+  const connect = async () => {
     if (typeof window !== "undefined" && typeof window.ethereum !== "undefined") {
       try {
-        await ethereum.request({method: "eth_requestAccounts"});
+        const accounts = await ethereum.request({method: "eth_requestAccounts"});
         setIsConnected(true)
         let connectedProvider = new ethers.providers.Web3Provider(window.ethereum)
         setProvider(connectedProvider)
         const _signer = connectedProvider.getSigner()
         setSigner(_signer)
         setSignerAddress(_signer.getAddress( ))
+        setAddress(accounts[0])
+        setFaucetContract(new ethers.Contract( "0x12d6fa140cf5817393128e802e778c2ea3d30f26" , faucetAbi , provider ))
         console.log(_signer.getAddress( ));
-        console.log(inputValue1);
+        console.log(accounts[0]);
+        
       } catch (e) {
         console.log(e);
       }
@@ -50,11 +54,41 @@ export default function faucet() {
       setIsConnected(false)
     }
   }
+  
 
-  const _faucetContract = new ethers.Contract("0x2cd4e4c16d5738bd3395b221a9701aa9190e9b8c" , faucetAbi , signer )
+  const getCurrentWalletConnected = async () => {
+    if (typeof window !== "undefined" && typeof window.ethereum !== "undefined") {
+      try {
 
-  const faucetContract = ethers => {
-   return new ethers.Contract( "0x2cd4e4c16d5738bd3395b221a9701aa9190e9b8c" , faucetAbi , provider )
+        const connectedProvider = new ethers.providers.Web3Provider(window.ethereum)
+        const accounts = await provider.send("eth_accounts", []);
+        if (accounts.length > 0) {
+          setSigner(connectedProvider.getSigner())
+          setSignerAddress(signer.getAddress( ))
+          setFaucetContract(new ethers.Contract( "0x12d6fa140cf5817393128e802e778c2ea3d30f26" , faucetAbi , provider ))
+        } else {
+          console.log("Connect your wallet using the connect button");
+        }
+      } catch (e) {
+        console.log(e);
+      }
+    }
+  }
+
+  const addWalletListener = async () => {
+    if (typeof window !== "undefined" && typeof window.ethereum !== "undefined") {
+      window.ethereum.on("accounsChanged", (accounts) => {
+        setAddress(accounts[0])
+      })
+  } else {
+    setAddress("")
+    console.log("please install metamask");
+  }
+}
+  const _faucetContract = new ethers.Contract("0x12d6fa140cf5817393128e802e778c2ea3d30f26" , faucetAbi , signer )
+
+  const faucetContract_ = ethers => {
+   return new ethers.Contract( "0x12d6fa140cf5817393128e802e778c2ea3d30f26" , faucetAbi , provider )
   }
   
     
@@ -66,24 +100,31 @@ export default function faucet() {
   // })
 
   const getFaucetToken = async () => {
-    await _faucetContract.getFaucet(signerAddress)
+    setGetFaucetError("")
+    try {
+      const contractWithSigner = faucetContract.connect(signer)
+      const resp = await contractWithSigner.requestTokens()   
+    } catch (err) {
+      console.log(err.message);
+      setGetFaucetError(err.message)
+    }
   }
 
 
-//   const handleSuccess = async function(tx) {
-//     await tx.wait(1)
-//     handleNewNotification(tx)
-// }
+  //   const handleSuccess = async function(tx) {
+  //     await tx.wait(1)
+  //     handleNewNotification(tx)
+  // }
 
-// const handleNewNotification = function () {
-//     dispatch ({
-//         type: "info",
-//         message: "Transaction Complete",
-//         title: "Tx Notification",
-//         position: "topR",
-//         icon: "bell"
-//     })
-// }
+  // const handleNewNotification = function () {
+  //     dispatch ({
+  //         type: "info",
+  //         message: "Transaction Complete",
+  //         title: "Tx Notification",
+  //         position: "topR",
+  //         icon: "bell"
+  //     })
+  // }
 
 
   return (
@@ -108,6 +149,9 @@ export default function faucet() {
         </div>
 
       <main className={styles.main}>
+      <span className='is-link has-text-weight-bold'>
+        {address && address.length > 0 ? `Connected to: ${address.substring(0,6)}...${address.substring(38)}` :"Connect wallet"}
+      </span>
         <div className='box'>
           <div className="tabs  is-centered ">
             <ul className=''>
@@ -123,9 +167,10 @@ export default function faucet() {
                 <div className='box mt-4'>
                 <label className="label">Get testnet tokens</label>
                 <div className="control">
+                  
                     <div className="navbarzz-item is-hoverable navbar-end ">
                     </div>
-                    <input className="input mt-2" value={inputValue1} type="text" placeholder="Input your address..."  />
+                    <input className="input mt-2" defaultValue={address} /*value={inputValue1}*/ type="text" placeholder="Input your address..."  />
                     <button onClick={async () => await getFaucetToken()} className='button is-link mt-2 mr-2'>Claim</button>
                 </div>
                 </div>

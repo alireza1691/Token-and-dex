@@ -4,35 +4,70 @@ import styles from '../styles/Home.module.css'
 import 'bulma/css/bulma.css'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
-import { ethers } from 'ethers'
+// import { ethers } from 'ethers'
 import {/*MoralisProvider,*/ useMoralis} from 'react-moralis'
+import { faucetAbi, faucetContractAddress, dexAbi, dexContractAddress } from '../constants'
+import { Contract, ethers } from 'ethers'
+import { Tab } from '@headlessui/react'
 // import { ethers } from 'hardhat'
 // import faucetContract from '../blockchain/faucetAbi'
 
 export default function faucet() {
 
+ 
   const [isConnected, setIsConnected] = useState(false);
   const [provider, setProvider] = useState();
   const [signer, setSigner] = useState()
-  const [error, setError] = useState ('')
+  const [faucetContract, setFaucetContract] = useState()
+  const [getFaucetError, setGetFaucetError] = useState ('')
   const [address, setAddress] = useState()
   const [web3, setWeb3] = useState()
   const [bcContract, setBcContract] = useState()
   const [balance, setBalance] = useState("0")
   const [inputValue1, setInputvalue1] = useState()
   const [inputValue2, setInputvalue2] = useState()
-  const [inputValue3, setInputvalue3] = useState()
+  const [signerAddress, setSignerAddress] = useState()
   const [betPlayers, setBetPlayers] = useState([])
   const [totalValue, setTotalValue] = useState()
+  const [toggleState, setToggleState] = useState(1)
+  const [dexContract, setDexContract] = useState()
 
-  const connect =async () => {
+//   const tabs = document.querySelectorAll('.tabs li')
+//   const tabContentBoxes = document.querySelectorAll("#tab-content > div")
+//   tabs.forEach((tab) =>{
+//     tab.addEventListener('click', () => {
+//         tabs.forEach(item => item.classList.remove('is-active'))
+//         tab.classList.add('is-active')
+
+//         const target = tab.dataset.target
+//         tabContentBoxes.forEach(box => {
+//             if(box.getAttribute('id') === target) {
+//                 box.classList.remove('is-hidden')
+//             } else {
+//                 box.classList.add('is-hidden')
+//             }
+//         })
+//     })
+//   })
+
+  
+  const connect = async () => {
     if (typeof window !== "undefined" && typeof window.ethereum !== "undefined") {
       try {
-        await ethereum.request({method: "eth_requestAccounts"});
+        const accounts = await ethereum.request({method: "eth_requestAccounts"});
         setIsConnected(true)
         let connectedProvider = new ethers.providers.Web3Provider(window.ethereum)
         setProvider(connectedProvider)
-        setSigner(connectedProvider.getSigner())
+        const _signer = connectedProvider.getSigner()
+        setSigner(_signer)
+        setSignerAddress(_signer.getAddress( ))
+        setAddress(accounts[0])
+        setFaucetContract(new ethers.Contract( "0x12d6fa140cf5817393128e802e778c2ea3d30f26" , faucetAbi , provider ))
+        // setDexContract(new ethers.Contract("0x51a78580a3d04c4fcf9f33c4ba6b611d467f55ab", dexAbi, provider))
+        // console.log(`dex contract address: ${dexContract.getAddress()}`);
+        console.log(_signer.getAddress( ));
+        console.log(accounts[0]);
+        
       } catch (e) {
         console.log(e);
       }
@@ -40,7 +75,71 @@ export default function faucet() {
       setIsConnected(false)
     }
   }
+  
 
+  const getCurrentWalletConnected = async () => {
+    if (typeof window !== "undefined" && typeof window.ethereum !== "undefined") {
+      try {
+
+        const connectedProvider = new ethers.providers.Web3Provider(window.ethereum)
+        const accounts = await provider.send("eth_accounts", []);
+        if (accounts.length > 0) {
+          setSigner(connectedProvider.getSigner())
+          setSignerAddress(signer.getAddress( ))
+          setFaucetContract(new ethers.Contract( "0x12d6fa140cf5817393128e802e778c2ea3d30f26" , faucetAbi , provider ))
+        } else {
+          console.log("Connect your wallet using the connect button");
+        }
+      } catch (e) {
+        console.log(e);
+      }
+    }
+  }
+
+  const addWalletListener = async () => {
+    if (typeof window !== "undefined" && typeof window.ethereum !== "undefined") {
+      window.ethereum.on("accounsChanged", (accounts) => {
+        setAddress(accounts[0])
+      })
+  } else {
+    setAddress("")
+    console.log("please install metamask");
+  }
+}
+  const _faucetContract = new ethers.Contract("0x12d6fa140cf5817393128e802e778c2ea3d30f26" , faucetAbi , signer )
+
+  const faucetContract_ = ethers => {
+   return new ethers.Contract( "0x12d6fa140cf5817393128e802e778c2ea3d30f26" , faucetAbi , provider )
+  }
+  
+    
+  // const { runContractFunction: getFaucet } = useWeb3Contract({
+  //   abi: faucetAbi,
+  //   contractAddress: faucetContractAddress, // specify the networkId
+  //   functionName: "getFaucet",
+  //   params: {inputValue1},
+  // })
+
+  const getFaucetToken = async () => {
+    setGetFaucetError("")
+    try {
+      const contractWithSigner = faucetContract.connect(signer)
+      const resp = await contractWithSigner.requestTokens()   
+    } catch (err) {
+      console.log(err.message);
+      setGetFaucetError(err.message)
+    }
+  }
+
+  const provideLiquidity = async (amount1, amount2) =>{
+    try {
+        const _dexContract = new ethers.Contract("0x51a78580a3d04c4fcf9f33c4ba6b611d467f55ab", dexAbi, provider)
+        const _dexWithSigner = _dexContract.connect(signer)
+        const resp = await _dexWithSigner._addLiquidity().call(amount1,amount2)
+    } catch (err) {
+        console.log(err.message);
+    }
+  }
   // const connectWalletHandler = async () => {
   //   setError('')
   //   if (typeof window !== "undefined" && typeof window.ethereum !== "undefined"){
@@ -99,37 +198,98 @@ export default function faucet() {
             <div className='navbar-end'>
               <div className='navbar-item'>
                 {/* {isConnected ? ("Connected") : (<button onClick={() => connect} className='button is-link'>Connect Wallet</button>)} */}
-                {isConnected ? (<button onClick={connect} className='button is-link'>Connected</button>) : (<button onClick={connect} className='button is-link'>Connect </button>)}
+                {isConnected ? (<button onClick={connect} className='button is-link' disabled>Connected</button>) : (<button onClick={connect} className='button is-link'>Connect </button>)}
               </div>
             </div>
           </nav>
         </div>
+        
 
       <main className={styles.main}>
-        <div className='box'>
-          <div className="tabs  is-centered ">
-            <ul className=''>
-              <li><Link href='/swap'>Swap</Link></li>
-              <li><Link href='/liquidity'>Pool</Link></li>
-              <li className="is-active"><a>Faucet</a></li>
-            </ul>
-          </div>
-          <div className='has-text-weight-semibold py-2'>
-          <p>Get test tokens once a day</p>
-          </div>
-          <p>These tokens hasn't any real value, you can use them for tesntnet transactions like Swap & Provide liquidity</p>
-                <div className='box mt-4'>
-                <label className="label">Get testnet tokens</label>
+        <div className='box is-large'>
+        <span className='navbar-end is-link has-text-grey'>
+        {address && address.length > 0 ? `Connected to: ${address.substring(0,6)}...${address.substring(38)}` :"Please connect your wallet"}
+      </span>
+          <div className="  is-centered ">
+            <Tab.Group>
+              <Tab.List className='py-3'>
+                <Tab className='button is-light is-normal mx-2'>Swap</Tab>
+                <Tab className='button is-light is-normal mx-2'>Pool</Tab>
+                <Tab className='button is-light is-normal mx-2'>Faucet</Tab>
+              </Tab.List>
+              <Tab.Panels>
+                <Tab.Panel>
+                  <div className='box'>
+                    <label className="label">IST to USDC</label>
+                    <div className="control">
+                      <div className="navbar-item is-hoverable navbar-end ">
+                      </div>
+                      <input className="input mt-2" value={""} type="text" placeholder="Input IST amount..."  />
+                      <input className="input mt-2" value={""} type="text" placeholder="0" />
+                      <button className='button is-link mt-2 mr-2'>Approve</button>
+                      <button className='button is-link mt-2' disabled>Swap</button>
+                    </div>
+                  </div>
+                  <div className='box'>
+                    <label className="label">USDC to IST</label>
+                    <div className="control">
+                      <div className="navbar-item is-hoverable navbar-end ">
+                       </div>
+                            <input className="input mt-2" value={""} type="text" placeholder="Input USDC amount..."  />
+                            <input className="input mt-2" value={""} type="text" placeholder="0" />
+                            <button className='button is-link mt-2 mr-2'>Approve</button>
+                            <button className='button is-link mt-2' disabled>Swap</button>
+                        </div>
+                      </div>
+                    </Tab.Panel>
+                    <Tab.Panel>
+                    <div className='box'>
+              <label className="label">Deposit liquidity</label>
                 <div className="control">
-                    <div className="navbarzz-item is-hoverable navbar-end ">
+                  <div className="navbar-item is-hoverable navbar-end ">
+                  </div>
+                  <input className="input mt-2" value={""} type="text" placeholder="Input USDC amount..." />
+                  <input className="input mt-2" value={""} type="text" placeholder="Input IST amount..." />
+                  <button onClick={async () => await provideLiquidity()} className='button is-link mt-2 mr-2'>Approve</button>
+                  <button className='button is-link mt-2' disabled>Deposit</button>
+                </div>
+              </div>
+              <div className='box'>
+              <label className="label">Withdraw liquidity</label>
+                <div className="control">
+                  <div className="navbar-item is-hoverable navbar-end ">
+                  </div>
+                  <input className="input mt-2" value={""} type="text" placeholder="Input USDC amount..." />
+                  <input className="input mt-2" value={""} type="text" placeholder="Input IST amount..." />
+                  <button className='button is-link mt-2 mr-2'>Approve</button>
+                  <button className='button is-link mt-2' disabled>Withdraw</button>
+                </div>
+              </div>
+                    </Tab.Panel>
+                    <Tab.Panel>
+                    <div className='has-text-weight-semibold py-2'>
+                <p>Get test tokens once a day</p>
+              </div>
+              <p>These tokens hasn't any real value, you can use them for tesntnet transactions like Swap & Provide liquidity</p>
+                <div className='box mt-4'>
+                  <label className="label">Get testnet tokens</label>
+                    <div className="control">
+                      <div className="navbarzz-item is-hoverable navbar-end ">
                     </div>
                     <input className="input mt-2" value={""} type="text" placeholder="Input your address..."  />
-                    <button className='button is-link mt-2 mr-2'>Claim</button>
-                </div>
-                </div>
-               
-        </div>
-      </main>
+                    <button onClick={async () => await getFaucetToken()} className='button is-link mt-2 mr-2'>Claim</button>
+                  </div>
+                </div>      
+              
+                    </Tab.Panel>
+                </Tab.Panels>
+            </Tab.Group>
+           
+          </div>
+            <div className='is-hidden' id='faucet'>
+              </div>
+            </div>
+        </main>
 
       <footer className={styles.footer}>
         <a
