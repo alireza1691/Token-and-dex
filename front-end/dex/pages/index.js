@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { useState, useEffect } from 'react'
 // import { ethers } from 'ethers'
 import {/*MoralisProvider,*/ useMoralis} from 'react-moralis'
-import { faucetAbi, faucetContractAddress, dexAbi, dexContractAddress } from '../constants'
+import { faucetAbi, faucetAddress, dexAbi, dexAddress } from '../constants'
 import { Contract, ethers } from 'ethers'
 import { Tab } from '@headlessui/react'
 // import { ethers } from 'hardhat'
@@ -62,11 +62,13 @@ export default function faucet() {
         setSigner(_signer)
         setSignerAddress(_signer.getAddress( ))
         setAddress(accounts[0])
-        setFaucetContract(new ethers.Contract( "0x12d6fa140cf5817393128e802e778c2ea3d30f26" , faucetAbi , provider ))
+        setFaucetContract(new ethers.Contract( faucetAddress , faucetAbi , provider ))
         // setDexContract(new ethers.Contract("0x51a78580a3d04c4fcf9f33c4ba6b611d467f55ab", dexAbi, provider))
         // console.log(`dex contract address: ${dexContract.getAddress()}`);
+        setDexContract (new ethers.Contract("0x51a78580a3d04c4fcf9f33c4ba6b611d467f55ab", dexAbi, provider))
         console.log(_signer.getAddress( ));
         console.log(accounts[0]);
+        // window.location.reload()
         
       } catch (e) {
         console.log(e);
@@ -75,6 +77,21 @@ export default function faucet() {
       setIsConnected(false)
     }
   }
+useEffect(() => {
+  async function accountChanged () {
+    window.ethereum.on("accountsChanged", async function() {
+        const accounts = await window.ethereum.request({
+            method: 'eth-accounts',
+        })
+        if (accounts.length) {
+            setAddress(accounts[0])
+        } else {
+            window.location.reload()
+        }
+    })
+  }
+  accountChanged()
+},[])
   
 
   const getCurrentWalletConnected = async () => {
@@ -131,36 +148,17 @@ export default function faucet() {
     }
   }
 
-  const provideLiquidity = async (amount1, amount2) =>{
+  const provideLiquidity = async () =>{
     try {
-        const _dexContract = new ethers.Contract("0x51a78580a3d04c4fcf9f33c4ba6b611d467f55ab", dexAbi, provider)
-        const _dexWithSigner = _dexContract.connect(signer)
-        const resp = await _dexWithSigner._addLiquidity().call(amount1,amount2)
+        // const _dexContract = new ethers.Contract("0x51a78580a3d04c4fcf9f33c4ba6b611d467f55ab", dexAbi, provider)
+        const dexWithSigner = dexContract.connect(signer)
+        console.log(dexWithSigner);
+        const resp = await dexWithSigner._addLiquidity(100,100)
     } catch (err) {
         console.log(err.message);
     }
   }
-  // const connectWalletHandler = async () => {
-  //   setError('')
-  //   if (typeof window !== "undefined" && typeof window.ethereum !== "undefined"){
-  //       try{
-  //           const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
-  //           const account = accounts[0];
-  //           setAddress(account)
-  //           // const provider = new ethers.providers.Web3Provider(web3.currentProvider);
-  //           // setWeb3(web3)
-  //           // const accounts = await web3.eth.getAccounts();
-            
-  //           document.getElementById("connectButton").innerHTML = "Connected!"
-            
-  //       } catch (err) {
-  //           setError(err.message)
-  //       }
-        
-  //   } else {
-  //       console.log("please install metamask")
-  //   }
-  // }
+  
 
   // const getFaucet = async () => {
   //   await faucetContract.methods.getFaucet().send()

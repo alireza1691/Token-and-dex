@@ -5,43 +5,54 @@ import 'bulma/css/bulma.css'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 // import {/*MoralisProvider,*/ useMoralis} from "react-moralis"
+import { faucetAbi, faucetContractAddress, dexAbi, dexContractAddress } from '../constants'
+import { Contract, ethers } from 'ethers'
+import { Tab } from '@headlessui/react'
 
 
 export default function lp() {
 
-  const [error, setError] = useState ('')
+  const [isConnected, setIsConnected] = useState(false);
+  const [provider, setProvider] = useState();
+  const [signer, setSigner] = useState()
+  const [faucetContract, setFaucetContract] = useState()
+  const [getFaucetError, setGetFaucetError] = useState ('')
   const [address, setAddress] = useState()
   const [web3, setWeb3] = useState()
   const [bcContract, setBcContract] = useState()
   const [balance, setBalance] = useState("0")
   const [inputValue1, setInputvalue1] = useState()
   const [inputValue2, setInputvalue2] = useState()
-  const [inputValue3, setInputvalue3] = useState()
+  const [signerAddress, setSignerAddress] = useState()
   const [betPlayers, setBetPlayers] = useState([])
   const [totalValue, setTotalValue] = useState()
-
-  // const connectWalletHandler = async () => {
-  //   setError('')
-  //   if (typeof window !== "undefined" && typeof window.ethereum !== "undefined"){
-  //       try{
-  //           const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
-  //           const account = accounts[0];
-  //           setAddress(account)
-  //           // const provider = new ethers.providers.Web3Provider(web3.currentProvider);
-  //           // setWeb3(web3)
-  //           // const accounts = await web3.eth.getAccounts();
-            
-  //           document.getElementById("connectButton").innerHTML = "Connected!"
-            
-  //       } catch (err) {
-  //           setError(err.message)
-  //       }
+  const [toggleState, setToggleState] = useState(1)
+  const [dexContract, setDexContract] = useState()
+  const connect = async () => {
+    if (typeof window !== "undefined" && typeof window.ethereum !== "undefined") {
+      try {
+        const accounts = await ethereum.request({method: "eth_requestAccounts"});
+        setIsConnected(true)
+        let connectedProvider = new ethers.providers.Web3Provider(window.ethereum)
+        setProvider(connectedProvider)
+        const _signer = connectedProvider.getSigner()
+        setSigner(_signer)
+        setSignerAddress(_signer.getAddress( ))
+        setAddress(accounts[0])
+        // setFaucetContract(new ethers.Contract( "0x12d6fa140cf5817393128e802e778c2ea3d30f26" , faucetAbi , provider ))
+        // setDexContract(new ethers.Contract("0x51a78580a3d04c4fcf9f33c4ba6b611d467f55ab", dexAbi, provider))
+        // console.log(`dex contract address: ${dexContract.getAddress()}`);
+        setDexContract (new ethers.Contract("0x51a78580a3d04c4fcf9f33c4ba6b611d467f55ab", dexAbi, provider))
+        console.log(_signer.getAddress( ));
+        console.log(accounts[0]);
         
-  //   } else {
-  //       console.log("please install metamask")
-  //   }
-  // }
-
+      } catch (e) {
+        console.log(e);
+      }
+    } else {
+      setIsConnected(false)
+    }
+  }
 
   return (
     <div className={styles.container}>
@@ -57,7 +68,7 @@ export default function lp() {
             </div>
             <div className='navbar-end'>
               <div className='navbar-item'>
-                <button onClick={""} className='button is-link'>Connect Wallet</button>
+              {isConnected ? (<button onClick={connect} className='button is-link' disabled>Connected</button>) : (<button onClick={connect} className='button is-link'>Connect </button>)}
               </div>
             </div>
           </nav>
@@ -79,7 +90,7 @@ export default function lp() {
               </div>
               <input className="input mt-2" value={""} type="text" placeholder="Input USDC amount..." />
               <input className="input mt-2" value={""} type="text" placeholder="Input IST amount..." />
-              <button className='button is-link mt-2 mr-2'>Approve</button>
+              <button onClick={''} className='button is-link mt-2 mr-2'>Approve</button>
               <button className='button is-link mt-2' disabled>Deposit</button>
             </div>
           </div>
