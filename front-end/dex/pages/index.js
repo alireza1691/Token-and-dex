@@ -29,8 +29,9 @@ export default function faucet() {
   const [web3, setWeb3] = useState()
   const [bcContract, setBcContract] = useState()
   const [balance, setBalance] = useState("0")
-  const [inputValue1, setInputvalue1] = useState()
-  const [inputValue2, setInputvalue2] = useState()
+  const [inputValueIst, setInputvalueIst] = useState()
+  const [inputValueUsdc, setInputvalueUsdc] = useState()
+  const [inputValueShares, setInputvalueShares] = useState()
   const [signerAddress, setSignerAddress] = useState()
   const [betPlayers, setBetPlayers] = useState([])
   const [totalValue, setTotalValue] = useState()
@@ -40,11 +41,17 @@ export default function faucet() {
   const [istContract, setIstContract] = useState()
   const [userShares, setUserShares] = useState("0")
 
+  const [approvedAmountIst, setApprovedAmountIST] = useState()
+  const [approvedAmountUsdc, setApprovedAmountUsdc] = useState()
+
   const updateInputIst = event => {
-    setInputvalue1(event.target.value)
+    setInputvalueIst(event.target.value)
   }
   const updateInputUsdc = event => {
-    setInputvalue2(event.target.value)
+    setInputvalueUsdc(event.target.value)
+  }
+  const updateInputShare = event => {
+    setInputvalueShares(event.target.value)
   }
 
 
@@ -169,12 +176,16 @@ useEffect(() => {
   const approveUSDC = async () => {
     const USDCSigner = usdcContract.connect(signer)
     console.log(USDCSigner);
-    const approveUSDC = await USDCSigner.approve(dexContractAddress, inputValue2)
+    const approveUSDC = await USDCSigner.approve(dexContractAddress, (ethers.utils.parseUnits(inputValueUsdc.toString(), "mwei")))
+    const valueNow = ethers.utils.parseUnits(inputValueUsdc.toString(), "mwei")
+    setApprovedAmountUsdc(valueNow)
   }
   const approveIST = async () => {
     const ISTSigner = istContract.connect(signer)
     console.log(ISTSigner);
-    const approveIST = await ISTSigner.approve(dexContractAddress,inputValue1)
+    const approveIST = await ISTSigner.approve(dexContractAddress,(ethers.utils.parseEther(inputValueIst)))
+    const valueNow = ethers.utils.parseEther(inputValueIst)
+    setApprovedAmountIST(valueNow)
   }
 
   const provideLiquidity = async () => {
@@ -182,14 +193,13 @@ useEffect(() => {
         const _gasLimit = ethers.utils.hexlify(1000000)
         // const _gasPrice = provider.getGasPrice()
         const _gasPrice = ethers.utils.parseUnits("10.0", "gwei")
-        // const _gasPrice = BigNumber.from(1613539020)
-        console.log(_gasPrice);
         const dexWithSigner = dexContract.connect(signer)
-        console.log(dexWithSigner);
-        const resp = await dexWithSigner._addLiquidity(inputValue2,inputValue1, {
+        const resp = await dexWithSigner._addLiquidity(ethers.utils.parseUnits(inputValueUsdc , "mwei"),ethers.utils.parseEther(inputValueIst), {
             gasLimit: _gasLimit,
             gasPrice: _gasPrice
         })
+        // setApprovedAmountUsdc(0)
+        // setApprovedAmountIST(0)
     } catch (err) {
         console.log(err.message);
     }
@@ -204,7 +214,7 @@ useEffect(() => {
         console.log(_gasPrice);
         const dexWithSigner = dexContract.connect(signer)
         console.log(dexWithSigner);
-        const resp = await dexWithSigner._removeLiquidity(100, {
+        const resp = await dexWithSigner._removeLiquidity(inputValueShares, {
             gasLimit: _gasLimit,
             gasPrice: _gasPrice
         })
@@ -228,7 +238,7 @@ useEffect(() => {
     const _gasPrice = ethers.utils.parseUnits("10.0", "gwei")
 
     const dexWithSigner = dexContract.connect(signer)
-    const _swap = await (dexWithSigner._swapWithMyToken(istContractAddress,100,{
+    const _swap = await (dexWithSigner._swapWithMyToken(istContractAddress,ethers.utils.parseEther(inputValueIst),{
         gasLimit: _gasLimit,
         gasPrice: _gasPrice 
     }))
@@ -238,7 +248,7 @@ useEffect(() => {
     const _gasPrice = ethers.utils.parseUnits("10.0", "gwei")
 
     const dexWithSigner = dexContract.connect(signer)
-    const _swap = await (dexWithSigner._swapWithMyToken(usdcContractAddress,100,{
+    const _swap = await (dexWithSigner._swapWithMyToken(usdcContractAddress,ethers.utils.parseUnits(inputValueUsdc, "mwei"),{
         gasLimit: _gasLimit,
         gasPrice: _gasPrice 
     }))
@@ -342,7 +352,7 @@ useEffect(() => {
                   <div className="navbar-item is-hoverable navbar-end ">
                   </div>
                   <div className='navbar-end has-text-grey-light'>Your shares: {userShares}</div>
-                  <input className="input mt-2 has-text-grey" value={""} type="text" placeholder="Input your shares..." />
+                  <input onChange={updateInputShare} className="input mt-2 has-text-grey" /*value={""}*/ type="text" placeholder="Input your shares..." />
                   {/* <input className="input mt-2" value={""} type="text" placeholder="Input IST amount..." /> */}
                   <button onClick={async () => await withdrawLiquidity()} className='button is-link mt-2 mr-2'>Approve</button>
                   <button className='button is-link mt-2' disabled>Withdraw</button>
