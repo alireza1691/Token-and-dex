@@ -1,11 +1,13 @@
 const faucetAbi = require("./faucetAbi.json")
-const faucetAddress = require("./faucetContractAdresses.json")
+const faucetContractAddress = require("./faucetContractAdresses.json")
 const dexAbi = require('./dexAbi.json')
-const dexAddress = require('./dexContractAddress.json')
+const dexContractAddress = require('./dexContractAddress.json')
+const iErc20Abi = require('./IERC20ABI.json')
 
 module.exports = {
-    faucetAddress,
+    faucetContractAddress,
     faucetAbi,
     dexAbi,
-    dexAddress
+    dexContractAddress,
+    iErc20Abi
 }

@@ -5,14 +5,19 @@ import 'bulma/css/bulma.css'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 // import { ethers } from 'ethers'
-import {/*MoralisProvider,*/ useMoralis} from 'react-moralis'
-import { faucetAbi, faucetAddress, dexAbi, dexAddress } from '../constants'
-import { Contract, ethers } from 'ethers'
+import {/*MoralisProvider,*/ useMoralis, useWeb3Contract} from 'react-moralis'
+import { faucetAbi, faucetContractAddress, dexAbi, dexContractAddress, iErc20Abi } from '../constants'
+import { BigNumber, Contract, ethers } from 'ethers'
 import { Tab } from '@headlessui/react'
 // import { ethers } from 'hardhat'
 // import faucetContract from '../blockchain/faucetAbi'
 
 export default function faucet() {
+
+    const { Moralis, isWeb3Enabled, chainId: chainIdHex } = useMoralis()
+
+    const usdcContractAddress = "0x07865c6E87B9F70255377e024ace6630C1Eaa37F"
+    const istContractAddress = "0x9c3565df44b79a7dbdab3678f0b00b9beabc7d70"
 
  
   const [isConnected, setIsConnected] = useState(false);
@@ -31,6 +36,17 @@ export default function faucet() {
   const [totalValue, setTotalValue] = useState()
   const [toggleState, setToggleState] = useState(1)
   const [dexContract, setDexContract] = useState()
+  const [usdcContract, setUsdcContract] = useState()
+  const [istContract, setIstContract] = useState()
+  const [userShares, setUserShares] = useState("0")
+
+  const updateInputIst = event => {
+    setInputvalue1(event.target.value)
+  }
+  const updateInputUsdc = event => {
+    setInputvalue2(event.target.value)
+  }
+
 
 //   const tabs = document.querySelectorAll('.tabs li')
 //   const tabContentBoxes = document.querySelectorAll("#tab-content > div")
@@ -49,8 +65,6 @@ export default function faucet() {
 //         })
 //     })
 //   })
-
-  
   const connect = async () => {
     if (typeof window !== "undefined" && typeof window.ethereum !== "undefined") {
       try {
@@ -62,12 +76,22 @@ export default function faucet() {
         setSigner(_signer)
         setSignerAddress(_signer.getAddress( ))
         setAddress(accounts[0])
-        setFaucetContract(new ethers.Contract( faucetAddress , faucetAbi , provider ))
+        setFaucetContract(new ethers.Contract( faucetContractAddress , faucetAbi , provider ))
         // setDexContract(new ethers.Contract("0x51a78580a3d04c4fcf9f33c4ba6b611d467f55ab", dexAbi, provider))
         // console.log(`dex contract address: ${dexContract.getAddress()}`);
-        setDexContract (new ethers.Contract("0x51a78580a3d04c4fcf9f33c4ba6b611d467f55ab", dexAbi, provider))
+        const dexC = new ethers.Contract(dexContractAddress, dexAbi, provider)
+        setDexContract (dexC)
+        
+        const dexWithSigner =  dexC.connect(_signer)
+        const get = await (dexWithSigner.balanceOf(accounts[0]))
+        setUserShares(get.toString())
+
+
+        setUsdcContract (new ethers.Contract(usdcContractAddress , iErc20Abi ,  provider))
+        setIstContract (new ethers.Contract(istContractAddress , iErc20Abi ,  provider))
         console.log(_signer.getAddress( ));
         console.log(accounts[0]);
+        // console.log(dexContract);
         // window.location.reload()
         
       } catch (e) {
@@ -103,7 +127,7 @@ useEffect(() => {
         if (accounts.length > 0) {
           setSigner(connectedProvider.getSigner())
           setSignerAddress(signer.getAddress( ))
-          setFaucetContract(new ethers.Contract( "0x12d6fa140cf5817393128e802e778c2ea3d30f26" , faucetAbi , provider ))
+          setFaucetContract(new ethers.Contract( faucetContractAddress , faucetAbi , provider ))
         } else {
           console.log("Connect your wallet using the connect button");
         }
@@ -122,13 +146,7 @@ useEffect(() => {
     setAddress("")
     console.log("please install metamask");
   }
-}
-  const _faucetContract = new ethers.Contract("0x12d6fa140cf5817393128e802e778c2ea3d30f26" , faucetAbi , signer )
-
-  const faucetContract_ = ethers => {
-   return new ethers.Contract( "0x12d6fa140cf5817393128e802e778c2ea3d30f26" , faucetAbi , provider )
   }
-  
     
   // const { runContractFunction: getFaucet } = useWeb3Contract({
   //   abi: faucetAbi,
@@ -148,21 +166,86 @@ useEffect(() => {
     }
   }
 
-  const provideLiquidity = async () =>{
+  const approveUSDC = async () => {
+    const USDCSigner = usdcContract.connect(signer)
+    console.log(USDCSigner);
+    const approveUSDC = await USDCSigner.approve(dexContractAddress, inputValue2)
+  }
+  const approveIST = async () => {
+    const ISTSigner = istContract.connect(signer)
+    console.log(ISTSigner);
+    const approveIST = await ISTSigner.approve(dexContractAddress,inputValue1)
+  }
+
+  const provideLiquidity = async () => {
     try {
-        // const _dexContract = new ethers.Contract("0x51a78580a3d04c4fcf9f33c4ba6b611d467f55ab", dexAbi, provider)
+        const _gasLimit = ethers.utils.hexlify(1000000)
+        // const _gasPrice = provider.getGasPrice()
+        const _gasPrice = ethers.utils.parseUnits("10.0", "gwei")
+        // const _gasPrice = BigNumber.from(1613539020)
+        console.log(_gasPrice);
         const dexWithSigner = dexContract.connect(signer)
         console.log(dexWithSigner);
-        const resp = await dexWithSigner._addLiquidity(100,100)
+        const resp = await dexWithSigner._addLiquidity(inputValue2,inputValue1, {
+            gasLimit: _gasLimit,
+            gasPrice: _gasPrice
+        })
     } catch (err) {
         console.log(err.message);
     }
   }
-  
 
-  // const getFaucet = async () => {
-  //   await faucetContract.methods.getFaucet().send()
-  // }
+  const withdrawLiquidity = async () => {
+    try {
+        const _gasLimit = ethers.utils.hexlify(1000000)
+        // const _gasPrice = provider.getGasPrice()
+        const _gasPrice = ethers.utils.parseUnits("10.0", "gwei")
+        // const _gasPrice = BigNumber.from(1613539020)
+        console.log(_gasPrice);
+        const dexWithSigner = dexContract.connect(signer)
+        console.log(dexWithSigner);
+        const resp = await dexWithSigner._removeLiquidity(100, {
+            gasLimit: _gasLimit,
+            gasPrice: _gasPrice
+        })
+    } catch (err) {
+        console.log(err.message);
+    }
+  }
+
+  const getBalance = async () => {
+    const dexWithSigner = dexContract.connect(signer)
+    const get = await (dexWithSigner.balanceOf(address))
+    
+    console.log(get.toString());
+    setUserShares(get.toString())
+    // setUserShares(get)
+  }
+
+
+  const swapIstToUsdc = async () => {
+    const _gasLimit = ethers.utils.hexlify(1000000)
+    const _gasPrice = ethers.utils.parseUnits("10.0", "gwei")
+
+    const dexWithSigner = dexContract.connect(signer)
+    const _swap = await (dexWithSigner._swapWithMyToken(istContractAddress,100,{
+        gasLimit: _gasLimit,
+        gasPrice: _gasPrice 
+    }))
+  }
+  const swapUsdcToIst = async () => {
+    const _gasLimit = ethers.utils.hexlify(1000000)
+    const _gasPrice = ethers.utils.parseUnits("10.0", "gwei")
+
+    const dexWithSigner = dexContract.connect(signer)
+    const _swap = await (dexWithSigner._swapWithMyToken(usdcContractAddress,100,{
+        gasLimit: _gasLimit,
+        gasPrice: _gasPrice 
+    }))
+  }
+
+
+  
 
 
 //   const handleSuccess = async function(tx) {
@@ -222,10 +305,10 @@ useEffect(() => {
                     <div className="control">
                       <div className="navbar-item is-hoverable navbar-end ">
                       </div>
-                      <input className="input mt-2" value={""} type="text" placeholder="Input IST amount..."  />
+                      <input onChange={updateInputIst} className="input mt-2" /*value={inputValue1}*/ type="text" placeholder="Input IST amount..."  />
                       <input className="input mt-2" value={""} type="text" placeholder="0" />
-                      <button className='button is-link mt-2 mr-2'>Approve</button>
-                      <button className='button is-link mt-2' disabled>Swap</button>
+                      <button onClick={async () => await approveIST()} className='button is-link mt-2 mr-2'>Approve</button>
+                      <button onClick={async () => await swapIstToUsdc()} className='button is-link mt-2' >Swap</button>
                     </div>
                   </div>
                   <div className='box'>
@@ -233,10 +316,10 @@ useEffect(() => {
                     <div className="control">
                       <div className="navbar-item is-hoverable navbar-end ">
                        </div>
-                            <input className="input mt-2" value={""} type="text" placeholder="Input USDC amount..."  />
+                            <input onChange={updateInputUsdc} className="input mt-2" /*value={""}*/ type="text" placeholder="Input USDC amount..."  />
                             <input className="input mt-2" value={""} type="text" placeholder="0" />
-                            <button className='button is-link mt-2 mr-2'>Approve</button>
-                            <button className='button is-link mt-2' disabled>Swap</button>
+                            <button onClick={async () => await approveUSDC()} className='button is-link mt-2 mr-2'>Approve</button>
+                            <button onClick={async () => await swapUsdcToIst()} className='button is-link mt-2' >Swap</button>
                         </div>
                       </div>
                     </Tab.Panel>
@@ -246,10 +329,11 @@ useEffect(() => {
                 <div className="control">
                   <div className="navbar-item is-hoverable navbar-end ">
                   </div>
-                  <input className="input mt-2" value={""} type="text" placeholder="Input USDC amount..." />
-                  <input className="input mt-2" value={""} type="text" placeholder="Input IST amount..." />
-                  <button onClick={async () => await provideLiquidity()} className='button is-link mt-2 mr-2'>Approve</button>
-                  <button className='button is-link mt-2' disabled>Deposit</button>
+                  <input onChange={updateInputUsdc} className="input mt-2"  type="text" placeholder="Input USDC amount..." />
+                  <input onChange={updateInputIst} className="input mt-2"  type="text" placeholder="Input IST amount..." />
+                  <button onClick={async () => await approveUSDC()} className='button is-link mt-2 mr-2'>Approve USDC</button>
+                  <button onClick={async () => await approveIST()} className='button is-link mt-2 mr-2'>Approve IST</button>
+                  <button onClick={async () => await provideLiquidity()} className='button is-link mt-2' >Deposit</button>
                 </div>
               </div>
               <div className='box'>
@@ -257,9 +341,10 @@ useEffect(() => {
                 <div className="control">
                   <div className="navbar-item is-hoverable navbar-end ">
                   </div>
-                  <input className="input mt-2" value={""} type="text" placeholder="Input USDC amount..." />
-                  <input className="input mt-2" value={""} type="text" placeholder="Input IST amount..." />
-                  <button className='button is-link mt-2 mr-2'>Approve</button>
+                  <div className='navbar-end has-text-grey-light'>Your shares: {userShares}</div>
+                  <input className="input mt-2 has-text-grey" value={""} type="text" placeholder="Input your shares..." />
+                  {/* <input className="input mt-2" value={""} type="text" placeholder="Input IST amount..." /> */}
+                  <button onClick={async () => await withdrawLiquidity()} className='button is-link mt-2 mr-2'>Approve</button>
                   <button className='button is-link mt-2' disabled>Withdraw</button>
                 </div>
               </div>
