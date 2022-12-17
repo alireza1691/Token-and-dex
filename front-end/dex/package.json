@@ -7,11 +7,12 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "compile": "solcjs  --abi --include-path node-modules/ --base-path . -o . blockchain/contracts/StableDex.sol --output-dir blockchain/build blockchain/contracts/MyToken.sol --output-dir blockchain/build blockchain/contracts/Faucet.sol --output-dir blockchain/build blockchain/contracts/ERC20Faucet.sol --output-dir blockchain/build"
+    "compile": "solcjs  --abi --include-path node-modules/ --base-path . -o . blockchain/contracts/StableDex.sol --output-dir blockchain/build blockchain/contracts/MyToken.sol --output-dir blockchain/build blockchain/contracts/Faucet.sol --output-dir blockchain/build blockchain/contracts/ERC20Faucet.sol --output-dir blockchain/build blockchain/contracts/ERC20.sol --output-dir blockchain/build"
   },
   "dependencies": {
     "@chainlink/contracts": "^0.5.1",
     "@headlessui/react": "^1.7.5",
+    "@mysten/wallet-kit": "^0.1.2",
     "@openzeppelin/contracts": "^4.8.0",
     "bulma": "^0.9.4",
     "css-loader": "^6.7.2",

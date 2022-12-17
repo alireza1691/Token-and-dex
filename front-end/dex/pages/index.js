@@ -3,12 +3,13 @@ import Image from 'next/image'
 import styles from '../styles/Home.module.css'
 import 'bulma/css/bulma.css'
 import Link from 'next/link'
-import { useState, useEffect } from 'react'
+import { React ,useState, useEffect } from 'react'
 // import { ethers } from 'ethers'
 import {/*MoralisProvider,*/ useMoralis, useWeb3Contract} from 'react-moralis'
-import { faucetAbi, faucetContractAddress, dexAbi, dexContractAddress, iErc20Abi } from '../constants'
+import { faucetAbi, faucetContractAddress, dexAbi, dexContractAddress, iErc20Abi, dexNew } from '../constants'
 import { BigNumber, Contract, ethers } from 'ethers'
 import { Tab } from '@headlessui/react'
+import { ConnectButton, useWallet } from "@mysten/wallet-kit";
 // import { ethers } from 'hardhat'
 // import faucetContract from '../blockchain/faucetAbi'
 
@@ -27,7 +28,7 @@ export default function faucet() {
   const [getFaucetError, setGetFaucetError] = useState ('')
   const [address, setAddress] = useState()
   const [web3, setWeb3] = useState()
-  const [bcContract, setBcContract] = useState()
+
   const [balance, setBalance] = useState("0")
   const [inputValueIst, setInputvalueIst] = useState()
   const [inputValueUsdc, setInputvalueUsdc] = useState()
@@ -40,9 +41,16 @@ export default function faucet() {
   const [usdcContract, setUsdcContract] = useState()
   const [istContract, setIstContract] = useState()
   const [userShares, setUserShares] = useState("0")
+//   const [pairAmount, setPairAmount] = useState()
 
   const [approvedAmountIst, setApprovedAmountIST] = useState()
   const [approvedAmountUsdc, setApprovedAmountUsdc] = useState()
+
+//   const UpdatePairAmount = event => {
+//     setPairAmount(event.target.value)
+//   }
+
+const totalSupply = 0
 
   const updateInputIst = event => {
     setInputvalueIst(event.target.value)
@@ -55,23 +63,7 @@ export default function faucet() {
   }
 
 
-//   const tabs = document.querySelectorAll('.tabs li')
-//   const tabContentBoxes = document.querySelectorAll("#tab-content > div")
-//   tabs.forEach((tab) =>{
-//     tab.addEventListener('click', () => {
-//         tabs.forEach(item => item.classList.remove('is-active'))
-//         tab.classList.add('is-active')
 
-//         const target = tab.dataset.target
-//         tabContentBoxes.forEach(box => {
-//             if(box.getAttribute('id') === target) {
-//                 box.classList.remove('is-hidden')
-//             } else {
-//                 box.classList.add('is-hidden')
-//             }
-//         })
-//     })
-//   })
   const connect = async () => {
     if (typeof window !== "undefined" && typeof window.ethereum !== "undefined") {
       try {
@@ -193,6 +185,7 @@ useEffect(() => {
         const _gasLimit = ethers.utils.hexlify(1000000)
         // const _gasPrice = provider.getGasPrice()
         const _gasPrice = ethers.utils.parseUnits("10.0", "gwei")
+
         const dexWithSigner = dexContract.connect(signer)
         const resp = await dexWithSigner._addLiquidity(ethers.utils.parseUnits(inputValueUsdc , "mwei"),ethers.utils.parseEther(inputValueIst), {
             gasLimit: _gasLimit,
@@ -238,7 +231,7 @@ useEffect(() => {
     const _gasPrice = ethers.utils.parseUnits("10.0", "gwei")
 
     const dexWithSigner = dexContract.connect(signer)
-    const _swap = await (dexWithSigner._swapWithMyToken(istContractAddress,ethers.utils.parseEther(inputValueIst),{
+    const _swap = await (dexWithSigner._swap(istContractAddress,ethers.utils.parseEther(inputValueIst),{
         gasLimit: _gasLimit,
         gasPrice: _gasPrice 
     }))
@@ -248,14 +241,16 @@ useEffect(() => {
     const _gasPrice = ethers.utils.parseUnits("10.0", "gwei")
 
     const dexWithSigner = dexContract.connect(signer)
-    const _swap = await (dexWithSigner._swapWithMyToken(usdcContractAddress,ethers.utils.parseUnits(inputValueUsdc, "mwei"),{
+    const _swap = await (dexWithSigner._swap(usdcContractAddress,ethers.utils.parseUnits(inputValueUsdc, "mwei"),{
         gasLimit: _gasLimit,
         gasPrice: _gasPrice 
     }))
   }
 
 
-  
+//   function getTotalSupply(props) {
+//     return<h1>Amout Of Pair Must Be: {props.amount}</h1>
+//   }
 
 
 //   const handleSuccess = async function(tx) {
@@ -285,6 +280,9 @@ useEffect(() => {
           <nav className='level navbar-has-shadow py-1'>
             <div className='navbar-brand'>
               <h1>Invesweet</h1>
+               {/* <div>
+                 <ConnectButton>connect</ConnectButton>
+                </div> */}
             </div>
             <div className='navbar-end'>
               <div className='navbar-item'>
@@ -336,6 +334,11 @@ useEffect(() => {
                     <Tab.Panel>
                     <div className='box'>
               <label className="label">Deposit liquidity</label>
+                {/* <div>
+                    <getTotalSupply amount= "This amount"/>
+                </div> */}
+                
+              {/* <div className='navbar-end has-text-grey-light'>Require this amout for pair: {inputValueIst}</div> */}
                 <div className="control">
                   <div className="navbar-item is-hoverable navbar-end ">
                   </div>

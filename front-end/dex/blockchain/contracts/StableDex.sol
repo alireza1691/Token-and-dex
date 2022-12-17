@@ -59,15 +59,15 @@ contract StableDex {
     uint public reserveUSDC;
     uint public reserveMYToken;
 
+
     uint public price;
 
     uint public totalSupply;
     mapping (address => uint) public balanceOf;
 
-    constructor(address _token, uint _price, address ethPriceFeedAddress) {
+    constructor(address _token, address ethPriceFeedAddress) {
         MYToken = IERC20 (_token);
         myToken = _token;
-        price = _price;
         ethPriceFeed = AggregatorV3Interface(ethPriceFeedAddress);
     }
 
@@ -75,6 +75,10 @@ contract StableDex {
 
     function _changePrice(uint _newPrice) external {
         price = _newPrice;
+    }
+    
+    function _getReserves() external view returns(uint, uint){
+        return(reserveMYToken,reserveUSDC);
     }
 
     function _getTokenAddress() external view returns (address) {
@@ -149,52 +153,34 @@ contract StableDex {
 
     }
 
-    function _swapWithEth () external payable returns(uint _amountOut) {
-        // require(_tokenIn == 0 || _tokenIn == MYToken, "Invalid Token");
-        require(msg.value > 0 , "Amount zero");
-
-
-        // Pull in token in
-    
-        // Calculate token out
-        // ydx / (x + dx) = dy
-        uint _amountInWithFee = (msg.value * 995) / 1000;
-        
-        uint256 ethPrice = getEthPrice();
-        _amountOut =(_amountInWithFee * ethPrice * price / (10 ** 18));
-
-        // Transfer token out to msg.sender
-        MYToken.transfer(msg.sender, _amountOut);
-
-        // // Update Reserves
-        // _updateReserves(USDCToken.balanceOf(address(this)), MYToken.balanceOf(address(this)));
-
-        // if (reserveMYToken / (reserveUSDC * 10 ** 12) > 2) {
-            
-        // }
-
-    }
-    function showPrice(uint amountEth) external view returns (uint){
-        uint256 ethPrice = getEthPrice();
-        uint _amountOut =((amountEth * ethPrice * price) / (10 ** 18));
-        return (_amountOut);
-    }
-    function getEthPrice()public view returns (uint256) {
-        (
-            ,
-            /*uint80 roundID*/ int price /*uint startedAt*/ /*uint timeStamp*/ /*uint80 answeredInRound*/,
-            ,
-            ,
-
-        ) = ethPriceFeed.latestRoundData();
-        return uint256(price * 10000000000);
-    }
     
 
+    
+    // function showPrice(uint amountEth) external view returns (uint){
+    //     uint256 ethPrice = getEthPrice();
+    //     uint _amountOut =((amountEth * ethPrice * price) / (10 ** 18));
+    //     return (_amountOut);
+    // }
+    // function getEthPrice()public view returns (uint256) {
+    //     (
+    //         ,
+    //         /*uint80 roundID*/ int price /*uint startedAt*/ /*uint timeStamp*/ /*uint80 answeredInRound*/,
+    //         ,
+    //         ,
 
+    //     ) = ethPriceFeed.latestRoundData();
+    //     return uint256(price * 10000000000);
+    // }
+    
     function _updateReserves (uint _reserveUSDC, uint _reserveMYToken) private {
         reserveUSDC = _reserveUSDC;
         reserveMYToken = _reserveMYToken;
+    }
+    function _getCurrentAmountForMyToken(uint amountUsdc) external view returns(uint amountMyToken) {
+        return ((reserveMYToken * amountUsdc) / reserveUSDC);
+    }
+    function _getCurrentAmountForUsdc(uint amountMyToken) external view returns(uint amountUsdc) {
+        return ((reserveMYToken * amountMyToken) / reserveUSDC);
     }
 
     function _addLiquidity (uint _amountUSDCToken, uint _amountMYToken) external returns (uint shares){
@@ -220,6 +206,16 @@ contract StableDex {
 
         // Update reserves
         _updateReserves(USDCToken.balanceOf(address(this)), MYToken.balanceOf(address(this)));
+    }
+
+    function getPoolSupply() external view returns(uint256 _totalsupply) {
+        return(totalSupply);
+    }
+    function getUsdcReserve() external view returns(uint256 _reserveUSDC) {
+        return(reserveUSDC );
+    }
+    function getMyTokenReserve() external view returns(uint256 _reserveMyToken) {
+        return(reserveMYToken);
     }
 
     function _removeLiquidity(uint _shares)external returns (uint amountUSDC, uint amountMYToken) {
