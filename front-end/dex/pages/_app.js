@@ -6,11 +6,13 @@ import Layout from '../components/Layout'
 function MyApp({ Component, pageProps }) {
   return (
     // <WalletKitProvider>
-    // <Layout>
+    
     <MoralisProvider initializeOnMount={false}>
+      <Layout>
         <Component {...pageProps} />
+      </Layout>
     </MoralisProvider>
-    // </Layout>
+    
     // </WalletKitProvider>
   );
 }
