@@ -56,14 +56,14 @@ contract StableDex {
     IERC20 public USDCToken = IERC20(USDC);
     IERC20 public MYToken;
 
-    uint public reserveUSDC;
-    uint public reserveMYToken;
+    uint256 public reserveUSDC;
+    uint256 public reserveMYToken;
 
 
     uint public price;
 
-    uint public totalSupply;
-    mapping (address => uint) public balanceOf;
+    uint256 public totalSupply;
+    mapping (address => uint256) public balanceOf;
 
     constructor(address _token, address ethPriceFeedAddress) {
         MYToken = IERC20 (_token);
@@ -77,8 +77,11 @@ contract StableDex {
         price = _newPrice;
     }
     
-    function _getReserves() external view returns(uint, uint){
-        return(reserveMYToken,reserveUSDC);
+    function _getReserveMyToken() external view returns(uint256){
+        return(reserveMYToken);
+    }
+    function _getReserveUsdc() external view returns(uint256){
+        return(reserveUSDC);
     }
 
     function _getTokenAddress() external view returns (address) {
@@ -88,28 +91,28 @@ contract StableDex {
         return (myToken);
     }
 
-    function _mintShares (address _to, uint _amount) private {
+    function _mintShares (address _to, uint256 _amount) private {
         balanceOf[_to] += _amount;
         totalSupply += _amount;
     }
 
-    function _burnShares (address _from, uint _amount) private {
+    function _burnShares (address _from, uint256 _amount) private {
         balanceOf[_from] -= _amount;
         totalSupply -= _amount;
     }
-    function _swap (IERC20 _tokenIn, uint _amountIn) external returns(uint _amountOut) {
+    function _swap (IERC20 _tokenIn, uint256 _amountIn) external returns(uint256 _amountOut) {
         require(_tokenIn == USDCToken || _tokenIn == MYToken, "Invalid Token");
         require(_amountIn > 0 , "Amount zero");
 
 
         // Pull in token in
         bool isUsdc = _tokenIn ==  USDCToken;
-        (IERC20 tokenIn, IERC20 tokenOut , uint reserveIn, uint reserveOut) = isUsdc ? (USDCToken, MYToken, reserveUSDC, reserveMYToken) : (MYToken, USDCToken, reserveMYToken, reserveUSDC) ;
+        (IERC20 tokenIn, IERC20 tokenOut , uint256 reserveIn, uint256 reserveOut) = isUsdc ? (USDCToken, MYToken, reserveUSDC, reserveMYToken) : (MYToken, USDCToken, reserveMYToken, reserveUSDC) ;
 
         tokenIn.transferFrom(msg.sender, address(this), _amountIn);
         // Calculate token out
         // ydx / (x + dx) = dy
-        uint _amountInWithFee = (_amountIn * 995) / 1000;
+        uint256 _amountInWithFee = (_amountIn * 995) / 1000;
         _amountOut = (reserveOut * _amountInWithFee) / (reserveIn + _amountInWithFee);
         // _amountOut = isUsdc ? (_amountInWithFee * price * 10 ** 12) : (_amountInWithFee / (price * 10 ** 12));
 
@@ -125,7 +128,7 @@ contract StableDex {
 
     }
 
-    function _swapWithMyToken (IERC20 _tokenIn, uint _amountIn) external returns(uint _amountOut) {
+    function _swapWithMyToken (IERC20 _tokenIn, uint256 _amountIn) external returns(uint256 _amountOut) {
         require(_tokenIn == USDCToken || _tokenIn == MYToken, "Invalid Token");
         require(_amountIn > 0 , "Amount zero");
 
@@ -137,7 +140,7 @@ contract StableDex {
         tokenIn.transferFrom(msg.sender, address(this), _amountIn);
         // Calculate token out
         // ydx / (x + dx) = dy
-        uint _amountInWithFee = (_amountIn * 995) / 1000;
+        uint256 _amountInWithFee = (_amountIn * 995) / 1000;
         // _amountOut = (reserveOut * _amountInWithFee) / (reserveIn + _amountInWithFee);
         _amountOut = isUsdc ? (_amountInWithFee * price * 10 ** 12) : (_amountInWithFee / (price * 10 ** 12));
 
@@ -172,18 +175,18 @@ contract StableDex {
     //     return uint256(price * 10000000000);
     // }
     
-    function _updateReserves (uint _reserveUSDC, uint _reserveMYToken) private {
+    function _updateReserves (uint256 _reserveUSDC, uint256 _reserveMYToken) private {
         reserveUSDC = _reserveUSDC;
         reserveMYToken = _reserveMYToken;
     }
-    function _getCurrentAmountForMyToken(uint amountUsdc) external view returns(uint amountMyToken) {
+    function _getCurrentAmountForMyToken(uint256 amountUsdc) external view returns(uint256 amountMyToken) {
         return ((reserveMYToken * amountUsdc) / reserveUSDC);
     }
-    function _getCurrentAmountForUsdc(uint amountMyToken) external view returns(uint amountUsdc) {
+    function _getCurrentAmountForUsdc(uint256 amountMyToken) external view returns(uint256 amountUsdc) {
         return ((reserveMYToken * amountMyToken) / reserveUSDC);
     }
 
-    function _addLiquidity (uint _amountUSDCToken, uint _amountMYToken) external returns (uint shares){
+    function _addLiquidity (uint256 _amountUSDCToken, uint256 _amountMYToken) external returns (uint256 shares){
         // Pull in USDC & MYToken
         USDCToken.transferFrom(msg.sender, address(this), (_amountUSDCToken ));
         MYToken.transferFrom(msg.sender, address(this), (_amountMYToken));
@@ -218,12 +221,12 @@ contract StableDex {
         return(reserveMYToken);
     }
 
-    function _removeLiquidity(uint _shares)external returns (uint amountUSDC, uint amountMYToken) {
+    function _removeLiquidity(uint _shares)external returns (uint256 amountUSDC, uint256 amountMYToken) {
         // Calculate amounts with shares:
         // dx = (s * x) / T
         // dy = (s * y) / T
-        uint balUSDC = USDCToken.balanceOf(address(this));
-        uint balMYT = MYToken.balanceOf(address(this));
+        uint256 balUSDC = USDCToken.balanceOf(address(this));
+        uint256 balMYT = MYToken.balanceOf(address(this));
 
         amountUSDC = (_shares * balUSDC ) / totalSupply;
         amountMYToken = (_shares * balMYT ) / totalSupply;

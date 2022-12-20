@@ -12,6 +12,12 @@ import { Tab } from '@headlessui/react'
 import { ConnectButton, useWallet } from "@mysten/wallet-kit";
 // import { ethers } from 'hardhat'
 // import faucetContract from '../blockchain/faucetAbi'
+// import * as nearAPI from "near-api-js";
+// import { NearBindgen, near, call, view, initialize, UnorderedMap } from 'near-sdk-js'
+// import { setupWalletSelector } from "@near-wallet-selector/core";
+// import { setupNearWallet } from "@near-wallet-selector/near-wallet";
+
+
 
 export default function faucet() {
 
@@ -30,7 +36,7 @@ export default function faucet() {
   const [web3, setWeb3] = useState()
 
   const [balance, setBalance] = useState("0")
-  const [inputValueIst, setInputvalueIst] = useState()
+  const [inputValueIst, setInputvalueIst] = useState("0")
   const [inputValueUsdc, setInputvalueUsdc] = useState()
   const [inputValueShares, setInputvalueShares] = useState()
   const [signerAddress, setSignerAddress] = useState()
@@ -43,8 +49,13 @@ export default function faucet() {
   const [userShares, setUserShares] = useState("0")
 //   const [pairAmount, setPairAmount] = useState()
 
+const [usdcReserve, setUsdcReserve] = useState()
+const [istReserve, setIstReserve] = useState()
+
   const [approvedAmountIst, setApprovedAmountIST] = useState()
   const [approvedAmountUsdc, setApprovedAmountUsdc] = useState()
+
+const [outPutUsdc, setOutPutUsdc] = useState("0")
 
 //   const UpdatePairAmount = event => {
 //     setPairAmount(event.target.value)
@@ -61,6 +72,9 @@ const totalSupply = 0
   const updateInputShare = event => {
     setInputvalueShares(event.target.value)
   }
+
+
+  
 
 
 
@@ -88,10 +102,25 @@ const totalSupply = 0
 
         setUsdcContract (new ethers.Contract(usdcContractAddress , iErc20Abi ,  provider))
         setIstContract (new ethers.Contract(istContractAddress , iErc20Abi ,  provider))
+
         console.log(_signer.getAddress( ));
         console.log(accounts[0]);
         // console.log(dexContract);
         // window.location.reload()
+
+        const istR = await dexWithSigner._getReserveMyToken()
+        const usdcR = await dexWithSigner._getReserveUsdc()
+
+        console.log(`ist reserve: ${istR} and usdc reserve : ${usdcR}`);
+
+        setIstReserve(istR)
+        setUsdcReserve(usdcR)
+
+        // const lev = (usdcR * 10 ** 12) / (istR )
+        const lev = (( usdcR / (10**6)) * (1)) / ((istR / (10 ** 18)) + (1))
+        // const getFromCon = await dexContract._getCurrentAmountForUsdc(inputValueIst)
+        setOutPutUsdc(lev)
+        console.log(`output amount for each IST is ${lev} USDC`);
         
       } catch (e) {
         console.log(e);
@@ -197,6 +226,7 @@ useEffect(() => {
         console.log(err.message);
     }
   }
+  
 
   const withdrawLiquidity = async () => {
     try {
@@ -286,6 +316,7 @@ useEffect(() => {
             </div>
             <div className='navbar-end'>
               <div className='navbar-item'>
+                <button onClick={''} className='button is-black mr-2' disabled>Near Wallet</button>
                 {/* {isConnected ? ("Connected") : (<button onClick={() => connect} className='button is-link'>Connect Wallet</button>)} */}
                 {isConnected ? (<button onClick={connect} className='button is-link' disabled>Connected</button>) : (<button onClick={connect} className='button is-link'>Connect </button>)}
               </div>
@@ -314,7 +345,7 @@ useEffect(() => {
                       <div className="navbar-item is-hoverable navbar-end ">
                       </div>
                       <input onChange={updateInputIst} className="input mt-2" /*value={inputValue1}*/ type="text" placeholder="Input IST amount..."  />
-                      <input className="input mt-2" value={""} type="text" placeholder="0" />
+                      <input className="input mt-2" value={""} type="text" placeholder={`You get ${inputValueIst * outPutUsdc} USDC`} />
                       <button onClick={async () => await approveIST()} className='button is-link mt-2 mr-2'>Approve</button>
                       <button onClick={async () => await swapIstToUsdc()} className='button is-link mt-2' >Swap</button>
                     </div>
