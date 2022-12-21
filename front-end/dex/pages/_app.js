@@ -13,7 +13,7 @@ function MyApp({ Component, pageProps }) {
       </Layout>
     </MoralisProvider>
     
-    // </WalletKitProvider>
+    // {/* </WalletKitProvider> */}
   );
 }
 export default MyApp

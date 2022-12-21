@@ -1,6 +1,6 @@
 import { ConnectButton, useWallet } from "@mysten/wallet-kit";
 
-export function SendTransaction() {
+export default function SendTransaction() {
   const { connected, getAccounts, signAndExecuteTransaction } = useWallet();
 
   const handleClick = async () => {
@@ -22,8 +22,8 @@ export function SendTransaction() {
   };
 
   return (
-    <Button onClick={handleClick} disabled={!connected}>
-      Send Transaction
-    </Button>
+    <div>
+    <ConnectButton onClick={() => handleClick()} disabled={!connected}/>
+    </div>
   );
 }

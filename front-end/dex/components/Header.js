@@ -21,9 +21,6 @@ import { ConnectButton, useWallet } from "@mysten/wallet-kit";
 const Header = ({conncetWalletHandler, isConnected}) =>{
 
 
-  console.log(isConnected);
-
-
   return (
     <div className={styles.container}>
       <div className='box'>
