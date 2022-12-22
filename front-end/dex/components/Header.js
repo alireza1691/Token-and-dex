@@ -9,7 +9,7 @@ import {/*MoralisProvider,*/ useMoralis, useWeb3Contract} from 'react-moralis'
 import { faucetAbi, faucetContractAddress, dexAbi, dexContractAddress, iErc20Abi, dexNew } from '../constants'
 import { BigNumber, Contract, ethers } from 'ethers'
 import { Tab } from '@headlessui/react'
-import { ConnectButton, useWallet } from "@mysten/wallet-kit";
+import { ConnectButton } from '@suiet/wallet-kit';
 // import { ethers } from 'hardhat'
 // import faucetContract from '../blockchain/faucetAbi'
 // import * as nearAPI from "near-api-js";
@@ -31,11 +31,15 @@ const Header = ({conncetWalletHandler, isConnected}) =>{
                  <ConnectButton>connect</ConnectButton>
                 </div> */}
             </div>
+            
             <div className='navbar-end'>
+            <ConnectButton className='button  is-normal is-dark mt-2 '>Connect to Sui </ConnectButton>
+            
               <div className='navbar-item'>
-                <button onClick={''} className='button is-black mr-2' disabled>Near Wallet</button>
+              
+                {/* <button onClick={''} className='button is-black mr-2' disabled>Near Wallet</button> */}
                 {/* {isConnected ? ("Connected") : (<button onClick={() => connect} className='button is-link'>Connect Wallet</button>)} */}
-                {isConnected ? (<button onClick={conncetWalletHandler} className='button is-link' disabled>Connected</button>) : (<button onClick={conncetWalletHandler} className='button is-link'>Connect </button>)}
+                {isConnected ? (<button onClick={conncetWalletHandler} className='button is-info ' disabled>Connected</button>) : (<button onClick={conncetWalletHandler} className='button is-info button-text-bold'>Connect MetaMask </button>)}
               </div>
             </div>
           </nav>

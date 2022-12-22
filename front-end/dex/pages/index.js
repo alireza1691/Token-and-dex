@@ -26,6 +26,7 @@ import Footer from '../components/footer'
 
 export default function main() {
 
+   
 const { Moralis, isWeb3Enabled, chainId: chainIdHex } = useMoralis()
 
 const usdcContractAddress = "0x07865c6E87B9F70255377e024ace6630C1Eaa37F"

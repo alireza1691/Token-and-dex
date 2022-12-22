@@ -16,6 +16,7 @@
     "@near-wallet-selector/my-near-wallet": "^7.3.0",
     "@near-wallet-selector/near-wallet": "^7.3.0",
     "@openzeppelin/contracts": "^4.8.0",
+    "@suiet/wallet-kit": "^0.1.11",
     "bulma": "^0.9.4",
     "css-loader": "^6.7.2",
     "eslint": "8.29.0",
