@@ -4,6 +4,7 @@ import styles from '../styles/Home.module.css'
 import 'bulma/css/bulma.css'
 import Link from 'next/link'
 import { React ,useState, useEffect } from 'react'
+import { useHistory } from 'react-router-dom'
 // import { ethers } from 'ethers'
 import {/*MoralisProvider,*/ useMoralis, useWeb3Contract} from 'react-moralis'
 import { faucetAbi, faucetContractAddress, dexAbi, dexContractAddress, iErc20Abi, dexNew } from '../constants'
@@ -28,25 +29,21 @@ import { enabled } from 'waffle/lib/utils/Log'
 
 export default function main() {
 
-// const {address} = useFetch(address)
+// const {address} = useFetch()
 const { Moralis, isWeb3Enabled, chainId: chainIdHex } = useMoralis()
 
 const usdcContractAddress = "0x07865c6E87B9F70255377e024ace6630C1Eaa37F"
 const istContractAddress = "0x9c3565df44b79a7dbdab3678f0b00b9beabc7d70"
 
- 
 const [isConnected, setIsConnected] = useState(false);
 const [provider, setProvider] = useState();
 const [signer, setSigner] = useState()
 const [faucetContract, setFaucetContract] = useState()
 const [getFaucetError, setGetFaucetError] = useState ('')
 const [address, setAddress] = useState()
-
-const [balance, setBalance] = useState("0")
 const [inputValueIst, setInputvalueIst] = useState()
 const [inputValueUsdc, setInputvalueUsdc] = useState()
 const [inputValueShares, setInputvalueShares] = useState()
-const [signerAddress, setSignerAddress] = useState()
 const [dexContract, setDexContract] = useState()
 const [usdcContract, setUsdcContract] = useState()
 const [istContract, setIstContract] = useState()
@@ -72,19 +69,6 @@ const [pairAmount , setPairAmount ] = useState("0")
 
 const totalSupply = 0
 
-  const updateInputIst = event => {
-    setInputvalueIst(event.target.value)
-  }
-  const updateInputUsdc = event => {
-    setInputvalueUsdc(event.target.value)
-  }
-  const updateInputShare = event => {
-    setInputvalueShares(event.target.value)
-  }
-
-
-  
-
 
 
   const conncetWalletHandler = async () => {
@@ -96,26 +80,57 @@ const totalSupply = 0
         setProvider(connectedProvider)
         const _signer = connectedProvider.getSigner()
         setSigner(_signer)
-        setSignerAddress(_signer.getAddress( ))
+        const chainId = await _signer.getChainId()
+        const goerliChainId = 5
+        console.log('chain id:',chainId);
+        if(chainId === goerliChainId){
+          console.log('connected to the georli network');
+        } else {
+          try {
+            await provider.request({
+              method: 'wallet_switchEthereumChain',
+              params: [{ chainId: goerliChainId}],
+            });
+          } catch (error) {
+            if (error.code === 4902) {
+            console.log("This network is not available in your metamask, please add it")
+            try {
+              await window.ethereum.request({
+                method: 'wallet_addEthereumChain',
+                params: [
+                  {
+                    chainId: '0x5',
+                    rpcUrl: 'https://goerli.infura.io/v3/',
+                    nativeCurrency: {
+                      name: GoerliEtherem,
+                      Symbol: GoerliETH,
+                      decimals: 18
+                    },
+                    blockExplorerUrl: 'https://goerli.etherscan.io',
+                  },
+                ],
+              });
+            } catch (addError) {
+                console.log(addError);
+              }
+            }
+            console.log("Failed to switch to the network")
+          }
+          }
+        
+        
         setAddress(accounts[0])
         setFaucetContract(new ethers.Contract( faucetContractAddress , faucetAbi , provider ))
-        // setDexContract(new ethers.Contract("0x51a78580a3d04c4fcf9f33c4ba6b611d467f55ab", dexAbi, provider))
-        // console.log(`dex contract address: ${dexContract.getAddress()}`);
         const dexC = new ethers.Contract(dexContractAddress, dexAbi, provider)
         setDexContract (dexC)
-        
         const dexWithSigner =  dexC.connect(_signer)
         const get = await (dexWithSigner.balanceOf(accounts[0]))
         setUserShares(get.toString())
-
-
         setUsdcContract (new ethers.Contract(usdcContractAddress , iErc20Abi ,  provider))
         setIstContract (new ethers.Contract(istContractAddress , iErc20Abi ,  provider))
 
         console.log(_signer.getAddress( ));
         console.log(accounts[0]);
-        // console.log(dexContract);
-        // window.location.reload()
 
         const istR = await dexWithSigner._getReserveMyToken()
         const usdcR = await dexWithSigner._getReserveUsdc()
@@ -126,17 +141,35 @@ const totalSupply = 0
         setUsdcReserve(usdcR)
 
         // const lev = (usdcR * 10 ** 12) / (istR )
-        const usdcUP = (( usdcR / (10**6)) * (1)) / ((istR / (10 ** 18)) + (1))
-        const istUP = (( istR / (10**6)) * (1)) / ((usdcR / (10 ** 18)) + (1))
-        // const getFromCon = await dexContract._getCurrentAmountForUsdc(inputValueIst)
-        setOutPutUsdc(usdcUP)
-        setOutPutIst(istUP)
+        const usdcOutPut = (( usdcR / (10**6)) * (1)) / ((istR / (10 ** 18)) + (1))
+        const istUPOutPut = (( istR / (10**6)) * (1)) / ((usdcR / (10 ** 18)) + (1))
+  
+        setOutPutUsdc(usdcOutPut)
+        setOutPutIst(istUPOutPut)
 
         setPairAmount(((usdcR * (10**12))/(istR)))
-        console.log(`output amount for each IST is ${usdcUP} USDC`);
-        console.log(`output amount for each IST is ${istUP} IST`);
+
+        window.ethereum.on('accountsChanged',async () =>{
+          const newAccounts = await ethereum.request({method: "eth_requestAccounts"})
+          setAddress(newAccounts[0])
+          console.log("connected wallet changed to:",newAccounts[0]);
+        })
+      
+        ethereum.on('chainChanged', async () => {
+          const newChainId = await signer.getChainId()
+          console.log(`chain id changed to :${newChainId}`);
+          window.location.reload();
+        })
+        ethereum.on('disconnect', async () => {
+        setIsConnected(false)
+        const nowConnection = ethereum.isConnected()
+        setIsConnected(nowConnection)
         
-      } catch (e) {
+        console.log('user disconnected!');
+      
+      });
+        
+        }catch (e) {
         console.log(e);
       }
     } else {
@@ -358,8 +391,8 @@ useEffect(() => {
                       className="input mt-2" 
                       value={(selectedToken == istContractAddress) ? inputValueIst : inputValueUsdc} 
                       type="text" placeholder="Input amount..."  />
-                      {selectedToken == istContractAddress && inputValueIst ? (<p className={styles.p}>{(selectedToken == istContractAddress) ? `You will receive ${inputValueIst } USDC` :`You will receive ${inputValueUsdc } IST`}</p>) : (<p></p>)}
-                      {selectedToken == usdcContractAddress && inputValueUsdc ? (<p className={styles.p}>{(selectedToken == usdcContractAddress) ? `You will receive ${inputValueUsdc } IST` :`You will receive ${inputValueIst } USDC`}</p>) : (<p></p>)}
+                      {selectedToken == istContractAddress && inputValueIst ? (<p className={styles.p}>{(selectedToken == istContractAddress) ? `You will receive ${outPutUsdc * inputValueIst } USDC` :`You will receive ${inputValueUsdc } IST`}</p>) : (<p></p>)}
+                      {selectedToken == usdcContractAddress && inputValueUsdc ? (<p className={styles.p}>{(selectedToken == usdcContractAddress) ? `You will receive ${outPutIst * inputValueUsdc } IST` :`You will receive ${inputValueIst } USDC`}</p>) : (<p></p>)}
                       {/* <input className="input mt-2" value={""} type="text" placeholder={(selectedToken == istContractAddress) ? `You get ${inputValueIst } USDC` :`You get ${inputValueUsdc } IST`} /> */}
 
                       {selectedToken == istContractAddress ? (isIstApproved ? (<button onClick={async () => await approveIST()} className='button is-link mt-2 mr-2' disabled>Approve IST</button>)
@@ -389,7 +422,7 @@ useEffect(() => {
                     {isUsdcApproved ? (<p>You must set <strong>{inputValueUsdc * pairAmount} IST</strong> as a pair token amount</p>) : (<p></p>)}
                   </div>
                   {isUsdcApproved ? (<input onChange={(e) => setInputvalueUsdc(e.target.value)} className="input mt-2"  type="text" placeholder="Input USDC amount..." value={inputValueUsdc} disabled/>) : (<input onChange={(e) => setInputvalueUsdc(e.target.value)} className="input mt-2"  type="text" placeholder="Input USDC amount..." value={inputValueUsdc}/>) }
-                  {(isIstApproved == false && isUsdcApproved == true )? (<input onChange={(e) => setInputvalueIst(e.target.value)} className="input mt-2"  type="text" placeholder="Input IST amount..." value={inputValueIst}/>) : (<input onChange={updateInputIst} className="input mt-2"  type="text" placeholder="Input IST amount..." disabled/>)}
+                  {(isIstApproved == false && isUsdcApproved == true )? (<input onChange={(e) => setInputvalueIst(e.target.value)} className="input mt-2"  type="text" placeholder="Input IST amount..." value={inputValueIst}/>) : (<input onChange={(e) => setInputvalueIst(e.target.value)} className="input mt-2"  type="text" placeholder="Input IST amount..." disabled/>)}
                   {/* <input onChange={updateInputUsdc} className="input mt-2"  type="text" placeholder="Input USDC amount..." />
                   <input onChange={updateInputIst} className="input mt-2"  type="text" placeholder="Input IST amount..." disabled/> */}
                   {isUsdcApproved ?(<button onClick={async () => await approveUSDC()} className='button is-link mt-2 mr-2' disabled>Approve USDC</button>) :(<button onClick={async () => await approveUSDC()} className='button is-link mt-2 mr-2'>Approve USDC</button>)}
@@ -403,16 +436,16 @@ useEffect(() => {
                   <div className="navbar-item is-hoverable navbar-end ">
                   </div>
                   <div className='navbar-end has-text-grey-light'>Your shares: {userShares}</div>
-                  <input onChange={updateInputShare} className="input mt-2 has-text-grey" /*value={""}*/ type="text" placeholder="Input your shares..." />
+                  <input onChange={(e) => setInputvalueShares(e.target.value)} className="input mt-2 has-text-grey" value={inputValueShares} type="text" placeholder="Input your shares..." />
                   {/* <input className="input mt-2" value={""} type="text" placeholder="Input IST amount..." /> */}
-                  <button onClick={async () => await withdrawLiquidity()} className='button is-link mt-2 mr-2'>Approve</button>
-                  <button className='button is-link mt-2' disabled>Withdraw</button>
+                  <button onClick={async () => await withdrawLiquidity()} className='button is-link mt-2 mr-2'>Withdraw</button>
+                  {/* <button className='button is-link mt-2' disabled>Withdraw</button> */}
                 </div>
               </div>
                     </Tab.Panel>
                     <Tab.Panel>
                     <div className='has-text-weight-semibold py-2'>
-                <p>Get test tokens once a day</p>
+                <p>Testnet tokens once a day</p>
               </div>
               <p>These tokens hasn't any real value, you can use them for tesntnet transactions like Swap & Provide liquidity</p>
                 <div className='box mt-4'>
@@ -420,7 +453,7 @@ useEffect(() => {
                     <div className="control">
                       <div className="navbarzz-item is-hoverable navbar-end ">
                     </div>
-                    <input className="input mt-2" value={""} type="text" placeholder="Input your address..."  />
+                    {/* <input className="input mt-2" value={""} type="text" placeholder="Input your address..."  /> */}
                     <button onClick={async () => await getFaucetToken()} className='button is-link mt-2 mr-2'>Claim</button>
                   </div>
                 </div>      

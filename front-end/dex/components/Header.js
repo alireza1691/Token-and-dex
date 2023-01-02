@@ -39,7 +39,7 @@ const Header = ({conncetWalletHandler, isConnected}) =>{
               
                 {/* <button onClick={''} className='button is-black mr-2' disabled>Near Wallet</button> */}
                 {/* {isConnected ? ("Connected") : (<button onClick={() => connect} className='button is-link'>Connect Wallet</button>)} */}
-                {isConnected ? (<button onClick={conncetWalletHandler} className='button is-info ' disabled>Connected</button>) : (<button onClick={conncetWalletHandler} className='button is-info button-text-bold'>Connect MetaMask </button>)}
+                <button onClick={conncetWalletHandler} className='button is-info ' disabled={isConnected}>{isConnected ? 'Wallet connected' : "Connect wallet"}</button>
               </div>
             </div>
           </nav>
