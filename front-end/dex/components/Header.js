@@ -1,5 +1,6 @@
 import Head from 'next/head'
 import Image from 'next/image'
+import "../public/Invesweet.png";
 import styles from '../styles/Home.module.css'
 import 'bulma/css/bulma.css'
 import Link from 'next/link'
@@ -26,10 +27,13 @@ const Header = ({conncetWalletHandler, isConnected}) =>{
       <div className='box'>
           <nav className='level navbar-has-shadow py-1'>
             <div className='navbar-brand'>
-              <h1>Invesweet</h1>
+              <div className={styles.navbarBrand}>
+              <img src='./Invesweet.png' ></img>
+              
                {/* <div>
                  <ConnectButton>connect</ConnectButton>
                 </div> */}
+                </div>
             </div>
             
             <div className='navbar-end'>
