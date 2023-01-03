@@ -4,8 +4,7 @@ import styles from '../styles/Home.module.css'
 import 'bulma/css/bulma.css'
 import Link from 'next/link'
 import { React ,useState, useEffect } from 'react'
-import { useHistory } from 'react-router-dom'
-// import { ethers } from 'ethers'
+// import { useHistory } from 'react-router-dom'
 import {/*MoralisProvider,*/ useMoralis, useWeb3Contract} from 'react-moralis'
 import { faucetAbi, faucetContractAddress, dexAbi, dexContractAddress, iErc20Abi, dexNew } from '../constants'
 import { BigNumber, Contract, ethers } from 'ethers'
@@ -387,7 +386,7 @@ useEffect(() => {
                       <div className="navbar-item is-hoverable navbar-end ">
                       </div>
                       <label>Enter your amount</label>
-                      <input onChange={(selectedToken == istContractAddress) ? ((e) =>setInputvalueIst(e.target.value)) : updateInputUsdc} 
+                      <input onChange={(selectedToken == istContractAddress) ? ((e) =>setInputvalueIst(e.target.value)) : ((e) => setInputvalueUsdc(e.target.value))} 
                       className="input mt-2" 
                       value={(selectedToken == istContractAddress) ? inputValueIst : inputValueUsdc} 
                       type="text" placeholder="Input amount..."  />
