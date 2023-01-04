@@ -377,12 +377,14 @@ useEffect(() => {
               <Tab.Panels>
                 <Tab.Panel>
                   <div className='box'>
-                    <label className="label">Select Token</label>
-                    <div className="control">
+                  <div className="control">
+                    <label className="label">Select Token:</label>
+                    <div className={styles.topRight}>
                     <select className={styles.select} value={selectedToken} onChange={(e) =>setSelectedToken(e.target.value)}>
                       <option value={istContractAddress}>IST to USDC</option>
                       <option value={usdcContractAddress}>USDC to IST</option>
                     </select>
+                    </div>
                       <div className="navbar-item is-hoverable navbar-end ">
                       </div>
                       <label>Enter your amount</label>
