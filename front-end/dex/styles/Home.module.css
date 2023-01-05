@@ -182,7 +182,7 @@
 } */
 
 .navbarBrand{
-  position: fixed;
+  position: absolute;
   top: 5px;
   width: 130px ;
   height: 40px;
@@ -194,4 +194,7 @@
   position: absolute;
   right: 0px;
   top: 0px;
+}
+.header{
+  position: fixed;
 }
