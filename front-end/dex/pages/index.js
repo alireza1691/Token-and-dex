@@ -7,7 +7,7 @@ import { React ,useState, useEffect } from 'react'
 // import { useHistory } from 'react-router-dom'
 import {/*MoralisProvider,*/ useMoralis, useWeb3Contract} from 'react-moralis'
 import { faucetAbi, faucetContractAddress, dexAbi, dexContractAddress, iErc20Abi, dexNew } from '../constants'
-import { BigNumber, Contract, ethers } from 'ethers'
+import { BigNumber, Contract, ethers, Wallet } from 'ethers'
 import { Tab } from '@headlessui/react'
 import { ConnectButton, useWallet } from "@mysten/wallet-kit";
 import useFetch from '../components/useFetch'
@@ -80,13 +80,13 @@ const totalSupply = 0
         const _signer = connectedProvider.getSigner()
         setSigner(_signer)
         const chainId = await _signer.getChainId()
-        const goerliChainId = 5
+        const goerliChainId = "0x5"
         console.log('chain id:',chainId);
         if(chainId === goerliChainId){
           console.log('connected to the georli network');
         } else {
           try {
-            await provider.request({
+            await window.ethereum.request({
               method: 'wallet_switchEthereumChain',
               params: [{ chainId: goerliChainId}],
             });
@@ -109,10 +109,11 @@ const totalSupply = 0
                   },
                 ],
               });
-            } catch (addError) {
-                console.log(addError);
+            } catch (error) {
+                console.log(error);
               }
             }
+            console.log(error);
             console.log("Failed to switch to the network")
           }
           }
@@ -149,7 +150,9 @@ const totalSupply = 0
         setPairAmount(((usdcR * (10**12))/(istR)))
 
         window.ethereum.on('accountsChanged',async () =>{
-          const newAccounts = await ethereum.request({method: "eth_requestAccounts"})
+          const newAccounts = await ethereum.request({method: "eth_accounts"})
+          // window.ethereum.request({method: "eth_accounts"})
+          // .then(handleAccountsChanged)
           setAddress(newAccounts[0])
           console.log("connected wallet changed to:",newAccounts[0]);
         })
