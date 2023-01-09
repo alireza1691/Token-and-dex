@@ -334,6 +334,7 @@ useEffect(() => {
   }
 
 
+
 //   function getTotalSupply(props) {
 //     return<h1>Amout Of Pair Must Be: {props.amount}</h1>
 //   }

@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 pragma abicoder v2;
+// @Author: Alireza Haghshenas 
+// This contract is not completed yet ,is just an idea to make swaps with an stable price whithout care about liquidity or reserve
+// Also ,in addition of USDC and MYTOKEN ,you can swap with ETH
 
-// import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-// import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
@@ -90,10 +91,7 @@ contract StableDex {
         // Update Reserves
         _updateReserves(USDCToken.balanceOf(address(this)), MYToken.balanceOf(address(this)));
 
-        // if (reserveMYToken / (reserveUSDC * 10 ** 12) > 2) {
-            
-        // }
-
+     
     }
     function _swapWithEth () external payable returns(uint _amountOut) {
         // require(_tokenIn == 0 || _tokenIn == MYToken, "Invalid Token");
@@ -112,13 +110,7 @@ contract StableDex {
         // Transfer token out to msg.sender
         MYToken.transfer(msg.sender, _amountOut);
 
-        // // Update Reserves
-        // _updateReserves(USDCToken.balanceOf(address(this)), MYToken.balanceOf(address(this)));
-
-        // if (reserveMYToken / (reserveUSDC * 10 ** 12) > 2) {
-            
-        // }
-
+  
     }
     function showPrice(uint amountEth) external view returns (uint){
         uint256 ethPrice = getEthPrice();
